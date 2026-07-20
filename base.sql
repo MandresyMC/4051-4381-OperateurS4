@@ -17,6 +17,7 @@ CREATE TABLE `operation` (
     `id_type` INT UNSIGNED NOT NULL,
     `id_user_source` INT,
     `id_user_destination` INT,
+    `id_operateur` INT UNSIGNED,
     `montant` DECIMAL(10,2) NOT NULL,
     `frais` DECIMAL(10,2) DEFAULT 0.00,
     `pourcentage_commission` DECIMAL(5,2) DEFAULT 0.00,
