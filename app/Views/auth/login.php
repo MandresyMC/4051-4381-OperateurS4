@@ -69,6 +69,13 @@
 
     <div class="mvola-toast" data-mvola-toast></div>
 
+    <div class="mvola-dev-notice">
+        Acces admin (sans connexion) :
+        <a href="<?= base_url('admin/dashboard') ?>">Dashboard</a> ·
+        <a href="<?= base_url('admin/configuration') ?>">Configuration</a> ·
+        <a href="<?= base_url('admin/clients') ?>">Clients</a>
+    </div>
+
     <script src="<?= base_url('Mvoladashboard/js/login.js') ?>"></script>
 </body>
 </html>

@@ -6,57 +6,27 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-$routes->get('/', 'HomeController::index');
-$routes->post('/login', 'LoginController::verify');
+// ===== Authentification =====
+$routes->get('/', 'Auth\HomeController::index');
+$routes->post('/login', 'Auth\LoginController::verify');
+$routes->get('/deconnexion', 'Auth\LoginController::deconnexion');
 
-$routes->get('/client/accueil', static function () {
-    return view('client/accueil', [
-        'numero' => session('numero_telephone'),
-        'solde'  => session('solde'),
-    ]);
-});
+// ===== Espace client =====
+$routes->get('/client/accueil', 'Client\AccueilController::index');
 
-$routes->get('/client/operation', 'OperationController::index');
+$routes->get('/client/operation', 'Client\OperationController::index');
+$routes->post('/client/operation', 'Client\OperationController::createOperation');
+$routes->get('/client/historique', 'Client\OperationController::historiques');
 
-$routes->get('/client/depot', static function () {
-    return view('client/transaction_form', [
-        'type'        => 'depot',
-        'title'       => "DEPOT D'ARGENT",
-        'description' => "Déposez de l'argent gratuitement dans votre compte MVola auprès de notre réseau de PoP MVola, Cash Point et Yas Store, partout à Madagascar.",
-        'solde'       => 'XXXXX',
-    ]);
-});
+$routes->get('/client/depot', 'Client\OperationController::formulaire/depot');
+$routes->get('/client/retrait', 'Client\OperationController::formulaire/retrait');
+$routes->get('/client/transfert', 'Client\OperationController::formulaire/transfert');
 
-$routes->get('/client/retrait', static function () {
-    return view('client/transaction_form', [
-        'type'        => 'retrait',
-        'title'       => "RETRAIT D'ARGENT",
-        'description' => "Retirez votre argent facilement auprès des PoP MVola, Yas Store, Cash Point ou auprès des DAB de la banque BRED Madagasikara BP dans toute la Grande Île.",
-        'solde'       => 'XXXXX',
-    ]);
-});
+// ===== Espace admin =====
+$routes->get('/admin/dashboard', 'Admin\DashboardController::index');
 
-$routes->get('/client/transfert', static function () {
-    return view('client/transaction_form', [
-        'type'        => 'transfert',
-        'title'       => "TRANSFERT D'ARGENT",
-        'description' => "Retirez votre argent facilement auprès des PoP MVola, Yas Store, Cash Point ou auprès des DAB de la banque BRED Madagasikara BP dans toute la Grande Île.",
-        'solde'       => 'XXXXX',
-    ]);
-});
+$routes->get('/admin/configuration', 'Admin\BaremeFraisController::index');
+$routes->post('/admin/bareme-frais', 'Admin\BaremeFraisController::createBaremeFrais');
+$routes->post('/admin/bareme-frais/(:num)/delete', 'Admin\BaremeFraisController::deleteBaremeFrais/$1');
 
-$routes->get('/client/historique', static function () {
-    return view('client/historique');
-});
-
-$routes->get('/admin/dashboard', static function () {
-    return view('admin/dashboard');
-});
-
-$routes->get('/admin/configuration', static function () {
-    return view('admin/configuration');
-});
-
-$routes->get('/admin/clients', static function () {
-    return view('admin/clients');
-});
+$routes->get('/admin/clients', 'Admin\SituationClientController::index');

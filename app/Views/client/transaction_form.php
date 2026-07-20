@@ -23,7 +23,13 @@ $isTransfert = $type === 'transfert';
             <h1 class="mvola-txform__title"><?= esc($title) ?></h1>
             <p class="mvola-txform__desc"><?= esc($description) ?></p>
 
-            <form class="txf-form" data-txf-form novalidate>
+            <?php if (session()->getFlashdata('error')) : ?>
+                <div class="hero-alert hero-alert--error"><?= esc(session()->getFlashdata('error')) ?></div>
+            <?php endif; ?>
+
+            <form class="txf-form" data-txf-form action="<?= base_url('client/operation') ?>" method="post" novalidate>
+                <input type="hidden" name="type_operation" value="<?= esc($type) ?>">
+
                 <label class="txf-label" for="txf-montant">Entrez le montant en Ariary&nbsp;:</label>
                 <input
                     class="txf-input"
@@ -33,10 +39,12 @@ $isTransfert = $type === 'transfert';
                     min="1"
                     step="1"
                     placeholder="20000"
+                    value="<?= esc(old('montant')) ?>"
+                    required
                     data-txf-montant
                 >
 
-                <p class="txf-solde">Solde restant&nbsp;: <span data-txf-solde><?= esc($solde) ?></span></p>
+                <p class="txf-solde">Solde actuel&nbsp;: <span data-txf-solde><?= number_format((float) $solde, 0, ',', ' ') ?> Ar</span></p>
 
                 <?php if ($isTransfert) : ?>
                     <label class="txf-label" for="txf-destination">Entrez le numero du destinataire&nbsp;:</label>
@@ -50,6 +58,8 @@ $isTransfert = $type === 'transfert';
                             name="numero_user_destination"
                             placeholder="38 63 456 98"
                             maxlength="12"
+                            value="<?= esc(old('numero_user_destination')) ?>"
+                            required
                             data-txf-destination
                         >
                     </div>

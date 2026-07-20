@@ -16,7 +16,6 @@
   var destInput = document.querySelector("[data-tx-destination]");
   var cancelBtn = document.querySelector("[data-tx-cancel]");
   var submitBtn = document.querySelector("[data-tx-submit]");
-  var sourceInput = document.querySelector('input[name="numero_user_source"]');
 
   if (!cards.length || !formPanel) {
     return;
@@ -33,7 +32,7 @@
     if (type === "depot") {
       destField.style.display = "none";
       destInput.removeAttribute("required");
-      destInput.value = sourceInput ? sourceInput.value : "";
+      destInput.value = "";
     } else {
       destField.style.display = "";
       destInput.setAttribute("required", "required");

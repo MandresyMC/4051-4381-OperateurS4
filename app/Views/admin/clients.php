@@ -1,16 +1,8 @@
 <?php
-// Front-only mock rows to demonstrate the working filters.
-$clients = [
-    ['numero' => '038 83 350 87', 'inscription' => '2025-11-02', 'solde' => 452000, 'statut' => 'actif'],
-    ['numero' => '033 12 345 67', 'inscription' => '2025-12-14', 'solde' => 128500, 'statut' => 'actif'],
-    ['numero' => '032 45 678 90', 'inscription' => '2026-01-05', 'solde' => 980000, 'statut' => 'actif'],
-    ['numero' => '034 22 111 09', 'inscription' => '2026-02-19', 'solde' => 15200,  'statut' => 'bloque'],
-    ['numero' => '037 55 044 21', 'inscription' => '2026-03-08', 'solde' => 63000,  'statut' => 'actif'],
-    ['numero' => '038 63 456 98', 'inscription' => '2026-04-22', 'solde' => 210300, 'statut' => 'actif'],
-    ['numero' => '033 98 011 44', 'inscription' => '2026-05-30', 'solde' => 4200,   'statut' => 'bloque'],
-    ['numero' => '032 71 200 15', 'inscription' => '2026-06-11', 'solde' => 349900, 'statut' => 'actif'],
-    ['numero' => '034 60 733 82', 'inscription' => '2026-07-01', 'solde' => 0,      'statut' => 'bloque'],
-];
+/**
+ * Attend $clients, fourni par Admin\SituationClientController::index() :
+ * id, numero_telephone, solde, nombre_operations, volume_total
+ */
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -30,7 +22,7 @@ $clients = [
         <section class="admin-section">
             <h1 class="admin-section__title">MES CLIENTS MVOLA</h1>
             <p class="admin-section__desc">
-                Consultez et filtrez la liste de vos clients&nbsp;: statut du compte, solde et date d'inscription.
+                Consultez et filtrez la liste de vos clients&nbsp;: solde et volume d'opérations effectuées.
             </p>
 
             <div class="clients-toolbar">
@@ -48,8 +40,8 @@ $clients = [
                     <span data-clients-solde-label>Trier par solde</span>
                 </button>
 
-                <button type="button" class="admin-btn admin-btn--yellow" data-clients-status-filter data-status="tous">
-                    <span data-clients-status-label>Filtrer par statut</span>
+                <button type="button" class="admin-btn admin-btn--yellow" data-clients-ops-filter>
+                    <span data-clients-ops-label>Trier par activité</span>
                 </button>
             </div>
 
@@ -58,32 +50,28 @@ $clients = [
                     <thead>
                         <tr>
                             <th>Numero</th>
-                            <th>Date d'inscription</th>
                             <th>Solde</th>
-                            <th>Statut</th>
+                            <th>Nombre d'opérations</th>
+                            <th>Volume total</th>
                         </tr>
                     </thead>
                     <tbody data-clients-body>
                         <?php foreach ($clients as $c) : ?>
                             <tr
                                 data-clients-row
-                                data-search="<?= esc(strtolower($c['numero'])) ?>"
+                                data-search="<?= esc(strtolower($c['numero_telephone'])) ?>"
                                 data-solde="<?= esc($c['solde']) ?>"
-                                data-statut="<?= esc($c['statut']) ?>"
+                                data-ops="<?= esc($c['nombre_operations']) ?>"
                             >
-                                <td class="admin-table__strong"><?= esc($c['numero']) ?></td>
-                                <td><?= esc(date('d/m/Y', strtotime($c['inscription']))) ?></td>
-                                <td><?= number_format($c['solde'], 0, ',', ' ') ?> Ar</td>
-                                <td>
-                                    <span class="admin-badge <?= $c['statut'] === 'actif' ? 'admin-badge--ok' : 'admin-badge--off' ?>">
-                                        <?= $c['statut'] === 'actif' ? 'ACTIF' : 'BLOQUE' ?>
-                                    </span>
-                                </td>
+                                <td class="admin-table__strong"><?= esc($c['numero_telephone']) ?></td>
+                                <td><?= number_format((float) $c['solde'], 0, ',', ' ') ?> Ar</td>
+                                <td><?= esc($c['nombre_operations']) ?></td>
+                                <td><?= number_format((float) $c['volume_total'], 0, ',', ' ') ?> Ar</td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-                <p class="admin-empty" data-clients-empty hidden>Aucun client ne correspond à votre recherche.</p>
+                <p class="admin-empty" data-clients-empty <?= count($clients) > 0 ? 'hidden' : '' ?>>Aucun client ne correspond à votre recherche.</p>
             </div>
         </section>
     </main>

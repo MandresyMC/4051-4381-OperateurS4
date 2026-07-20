@@ -14,14 +14,9 @@
   }
 
   if (form && submitBtn) {
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
+    form.addEventListener("submit", function () {
       submitBtn.classList.add("is-loading");
       submitBtn.disabled = true;
-      setTimeout(function () {
-        submitBtn.classList.remove("is-loading");
-        submitBtn.disabled = false;
-      }, 900);
     });
   }
 })();

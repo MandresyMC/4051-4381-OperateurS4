@@ -13,6 +13,13 @@
 
     <main class="mvola-hero">
         <div class="mvola-hero__text">
+            <?php if (session()->getFlashdata('success')) : ?>
+                <div class="hero-alert hero-alert--success"><?= esc(session()->getFlashdata('success')) ?></div>
+            <?php endif; ?>
+            <?php if (session()->getFlashdata('error')) : ?>
+                <div class="hero-alert hero-alert--error"><?= esc(session()->getFlashdata('error')) ?></div>
+            <?php endif; ?>
+
             <h1 class="mvola-hero__title">
                 MVola au c&#339;ur de Madagascar, dans le c&#339;ur des Malagasy&nbsp;!
             </h1>

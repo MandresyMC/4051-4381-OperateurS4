@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Auth;
 
+use App\Controllers\BaseController;
 use App\Models\UserModel;
 
 class LoginController extends BaseController
@@ -63,7 +64,7 @@ class LoginController extends BaseController
             'logged_in'         => true
         ]);
 
-        return redirect()->to('/client/operation');
+        return redirect()->to('/client/accueil');
     }
 
     public function deconnexion()

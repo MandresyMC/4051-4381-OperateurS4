@@ -67,6 +67,24 @@ a {
   max-width: 700px;
 }
 
+.hero-alert {
+  border: 2.5px solid var(--mvola-border);
+  padding: 16px 20px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+.hero-alert--success {
+  background-color: #dff3e4;
+  color: var(--mvola-green);
+}
+
+.hero-alert--error {
+  background-color: #fdeaea;
+  color: #a72525;
+}
+
 .mvola-hero__title {
   font-family: "DM Sans", Helvetica, Arial, sans-serif;
   font-weight: 600;

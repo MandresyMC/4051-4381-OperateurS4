@@ -4,8 +4,8 @@
   var searchInput = document.querySelector("[data-clients-search]");
   var soldeBtn = document.querySelector("[data-clients-solde-filter]");
   var soldeLabel = document.querySelector("[data-clients-solde-label]");
-  var statusBtn = document.querySelector("[data-clients-status-filter]");
-  var statusLabel = document.querySelector("[data-clients-status-label]");
+  var opsBtn = document.querySelector("[data-clients-ops-filter]");
+  var opsLabel = document.querySelector("[data-clients-ops-label]");
   var body = document.querySelector("[data-clients-body]");
   var emptyState = document.querySelector("[data-clients-empty]");
 
@@ -13,17 +13,10 @@
     return;
   }
 
-  var STATUS_CYCLE = ["tous", "actif", "bloque"];
-  var STATUS_LABELS = {
-    tous: "Filtrer par statut",
-    actif: "Statut : Actif",
-    bloque: "Statut : Bloqué",
-  };
-
   var state = {
     search: "",
-    status: "tous",
     soldeSort: null,
+    opsSort: null,
   };
 
   function getRows() {
@@ -35,10 +28,7 @@
     var visibleCount = 0;
 
     rows.forEach(function (row) {
-      var matchesSearch = row.getAttribute("data-search").indexOf(state.search) !== -1;
-      var matchesStatus = state.status === "tous" || row.getAttribute("data-statut") === state.status;
-      var visible = matchesSearch && matchesStatus;
-
+      var visible = row.getAttribute("data-search").indexOf(state.search) !== -1;
       row.hidden = !visible;
       if (visible) {
         visibleCount += 1;
@@ -50,15 +40,12 @@
     }
   }
 
-  function sortBySolde() {
-    if (!state.soldeSort) {
-      return;
-    }
+  function sortBy(attribute, direction) {
     var rows = getRows();
     rows.sort(function (a, b) {
-      var soldeA = parseFloat(a.getAttribute("data-solde"));
-      var soldeB = parseFloat(b.getAttribute("data-solde"));
-      return state.soldeSort === "asc" ? soldeA - soldeB : soldeB - soldeA;
+      var valueA = parseFloat(a.getAttribute(attribute));
+      var valueB = parseFloat(b.getAttribute(attribute));
+      return direction === "asc" ? valueA - valueB : valueB - valueA;
     });
     rows.forEach(function (row) {
       body.appendChild(row);
@@ -75,21 +62,24 @@
   if (soldeBtn && soldeLabel) {
     soldeBtn.addEventListener("click", function () {
       state.soldeSort = state.soldeSort === "desc" ? "asc" : "desc";
-      soldeLabel.textContent = state.soldeSort === "desc"
-        ? "Solde : plus élevé"
-        : "Solde : plus faible";
-      sortBySolde();
+      soldeLabel.textContent = state.soldeSort === "desc" ? "Solde : plus élevé" : "Solde : plus faible";
+      soldeBtn.classList.add("is-active");
+      if (opsBtn) {
+        opsBtn.classList.remove("is-active");
+      }
+      sortBy("data-solde", state.soldeSort);
     });
   }
 
-  if (statusBtn && statusLabel) {
-    statusBtn.addEventListener("click", function () {
-      var currentIndex = STATUS_CYCLE.indexOf(state.status);
-      var nextIndex = (currentIndex + 1) % STATUS_CYCLE.length;
-      state.status = STATUS_CYCLE[nextIndex];
-      statusLabel.textContent = STATUS_LABELS[state.status];
-      statusBtn.classList.toggle("is-active", state.status !== "tous");
-      applyFilters();
+  if (opsBtn && opsLabel) {
+    opsBtn.addEventListener("click", function () {
+      state.opsSort = state.opsSort === "desc" ? "asc" : "desc";
+      opsLabel.textContent = state.opsSort === "desc" ? "Activité : plus actifs" : "Activité : moins actifs";
+      opsBtn.classList.add("is-active");
+      if (soldeBtn) {
+        soldeBtn.classList.remove("is-active");
+      }
+      sortBy("data-ops", state.opsSort);
     });
   }
 })();

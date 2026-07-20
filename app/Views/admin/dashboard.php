@@ -1,35 +1,43 @@
 <?php
-// Front-only mock data to illustrate the dashboard layout.
+/**
+ * Attend, fournis par Admin\DashboardController::index() :
+ * $nombreUtilisateurs, $volumeTotal, $nombreOperations, $gainsTotal, $tauxEchec,
+ * $evolution (mois => nombre), $repartition (type_nom => nombre)
+ */
 $stats = [
-    ['label' => 'Utilisateurs actifs', 'value' => 12480, 'suffix' => '', 'trend' => '+8,4%', 'up' => true],
-    ['label' => 'Volume total transigé', 'value' => 284500000, 'suffix' => ' Ar', 'trend' => '+14,1%', 'up' => true],
-    ['label' => 'Transactions ce mois', 'value' => 9312, 'suffix' => '', 'trend' => '+3,2%', 'up' => true],
-    ['label' => "Taux d'échec", 'value' => 1.8, 'suffix' => ' %', 'trend' => '-0,4%', 'up' => false],
+    ['label' => 'Utilisateurs MVola', 'value' => number_format((float) $nombreUtilisateurs, 0, ',', ' ')],
+    ['label' => 'Volume total transigé', 'value' => number_format((float) $volumeTotal, 0, ',', ' ') . ' Ar'],
+    ['label' => 'Transactions totales', 'value' => number_format((float) $nombreOperations, 0, ',', ' ')],
+    ['label' => 'Gains sur frais', 'value' => number_format((float) $gainsTotal, 0, ',', ' ') . ' Ar'],
+    ['label' => "Taux d'échec", 'value' => str_replace('.', ',', (string) $tauxEchec) . ' %'],
 ];
 
-$months = [
-    ['label' => 'Fev', 'value' => 58],
-    ['label' => 'Mar', 'value' => 64],
-    ['label' => 'Avr', 'value' => 70],
-    ['label' => 'Mai', 'value' => 66],
-    ['label' => 'Juin', 'value' => 84],
-    ['label' => 'Juil', 'value' => 93],
-];
-$maxMonth = max(array_column($months, 'value'));
+$maxMonth = 1;
+foreach ($evolution as $m) {
+    $maxMonth = max($maxMonth, (int) $m['nombre']);
+}
 
-$breakdown = [
-    ['label' => 'Transfert', 'value' => 48, 'color' => '#317041'],
-    ['label' => 'Retrait', 'value' => 33, 'color' => '#fed200'],
-    ['label' => 'Depot', 'value' => 19, 'color' => '#4b7c39'],
+$couleurs = [
+    'depot'     => '#4b7c39',
+    'retrait'   => '#fed200',
+    'transfert' => '#317041',
 ];
+
+$totalRepartition = 0;
+foreach ($repartition as $r) {
+    $totalRepartition += (int) $r['nombre'];
+}
+
 $gradientStops = [];
 $cursor = 0;
-foreach ($breakdown as $slice) {
+foreach ($repartition as $r) {
+    $part = $totalRepartition > 0 ? round(($r['nombre'] / $totalRepartition) * 100) : 0;
     $start = $cursor;
-    $cursor += $slice['value'];
-    $gradientStops[] = $slice['color'] . ' ' . $start . '% ' . $cursor . '%';
+    $cursor += $part;
+    $couleur = $couleurs[$r['type_nom']] ?? '#3f3f44';
+    $gradientStops[] = $couleur . ' ' . $start . '% ' . $cursor . '%';
 }
-$conicGradient = 'conic-gradient(' . implode(', ', $gradientStops) . ')';
+$conicGradient = $gradientStops ? 'conic-gradient(' . implode(', ', $gradientStops) . ')' : '#e6e6e0';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -57,10 +65,7 @@ $conicGradient = 'conic-gradient(' . implode(', ', $gradientStops) . ')';
                 <?php foreach ($stats as $i => $stat) : ?>
                     <div class="stat-card" style="animation-delay: <?= $i * 0.08 ?>s">
                         <span class="stat-card__label"><?= esc($stat['label']) ?></span>
-                        <span class="stat-card__value" data-count-target="<?= esc($stat['value']) ?>" data-count-suffix="<?= esc($stat['suffix']) ?>">0<?= esc($stat['suffix']) ?></span>
-                        <span class="stat-card__trend <?= $stat['up'] ? 'is-up' : 'is-down' ?>">
-                            <?= $stat['up'] ? '&#9650;' : '&#9660;' ?> <?= esc($stat['trend']) ?>
-                        </span>
+                        <span class="stat-card__value"><?= esc($stat['value']) ?></span>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -69,32 +74,42 @@ $conicGradient = 'conic-gradient(' . implode(', ', $gradientStops) . ')';
         <section class="admin-section">
             <div class="chart-grid">
                 <div class="chart-card">
-                    <h2 class="chart-card__title">Évolution des transactions (en milliers)</h2>
-                    <div class="bar-chart">
-                        <?php foreach ($months as $m) : ?>
-                            <div class="bar-chart__col">
-                                <div class="bar-chart__bar" data-bar-target="<?= round(($m['value'] / $maxMonth) * 100) ?>">
-                                    <span class="bar-chart__value"><?= esc($m['value']) ?>k</span>
+                    <h2 class="chart-card__title">Évolution des transactions (par mois)</h2>
+                    <?php if (empty($evolution)) : ?>
+                        <p class="admin-empty">Aucune transaction enregistrée pour le moment.</p>
+                    <?php else : ?>
+                        <div class="bar-chart">
+                            <?php foreach ($evolution as $m) : ?>
+                                <div class="bar-chart__col">
+                                    <div class="bar-chart__bar" data-bar-target="<?= round(((int) $m['nombre'] / $maxMonth) * 100) ?>">
+                                        <span class="bar-chart__value"><?= esc($m['nombre']) ?></span>
+                                    </div>
+                                    <span class="bar-chart__label"><?= esc(date('M Y', strtotime($m['mois'] . '-01'))) ?></span>
                                 </div>
-                                <span class="bar-chart__label"><?= esc($m['label']) ?></span>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="chart-card">
                     <h2 class="chart-card__title">Répartition par opération</h2>
-                    <div class="donut-wrap">
-                        <div class="donut" style="background: <?= $conicGradient ?>;"></div>
-                        <ul class="donut-legend">
-                            <?php foreach ($breakdown as $slice) : ?>
-                                <li>
-                                    <span class="donut-legend__swatch" style="background-color: <?= esc($slice['color']) ?>;"></span>
-                                    <?= esc($slice['label']) ?> — <strong><?= esc($slice['value']) ?>%</strong>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
+                    <?php if (empty($repartition)) : ?>
+                        <p class="admin-empty">Aucune donnée à afficher.</p>
+                    <?php else : ?>
+                        <div class="donut-wrap">
+                            <div class="donut" style="background: <?= $conicGradient ?>;"></div>
+                            <ul class="donut-legend">
+                                <?php foreach ($repartition as $r) :
+                                    $part = $totalRepartition > 0 ? round(($r['nombre'] / $totalRepartition) * 100) : 0;
+                                ?>
+                                    <li>
+                                        <span class="donut-legend__swatch" style="background-color: <?= esc($couleurs[$r['type_nom']] ?? '#3f3f44') ?>;"></span>
+                                        <?= esc(ucfirst($r['type_nom'])) ?> — <strong><?= esc($part) ?>%</strong>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>

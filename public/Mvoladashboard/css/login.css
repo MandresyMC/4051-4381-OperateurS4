@@ -456,6 +456,43 @@ input:focus-visible {
   transform: translate(-50%, 0);
 }
 
+/* ===== Notice dev : acces direct aux pages admin ===== */
+.mvola-dev-notice {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 5;
+  background-color: #fffff0cc;
+  border: 1.5px solid #3f3f4433;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #3f3f4499;
+  white-space: nowrap;
+}
+
+.mvola-dev-notice a {
+  color: var(--mvola-green);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.mvola-dev-notice a:hover {
+  color: var(--mvola-text);
+}
+
+@media (max-width: 640px) {
+  .mvola-dev-notice {
+    white-space: normal;
+    text-align: center;
+    width: 92%;
+    font-size: 0.72rem;
+  }
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 900px) {
   .mvola-login {

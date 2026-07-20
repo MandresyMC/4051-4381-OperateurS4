@@ -1,3 +1,9 @@
+<?php
+/**
+ * Attend, fournis par Admin\BaremeFraisController::index() :
+ * $types (liste des types d'operation), $baremes (regles de frais existantes)
+ */
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -20,7 +26,14 @@
             <a class="admin-quicknav__link" data-quicknav-link href="#taxes">Taxes et frais</a>
         </nav>
 
-        <!-- ===== PREFIXES ===== -->
+        <?php if (session()->getFlashdata('success')) : ?>
+            <div class="taxes-form__note is-info" style="margin-bottom: 24px;"><?= esc(session()->getFlashdata('success')) ?></div>
+        <?php endif; ?>
+        <?php if (session()->getFlashdata('error')) : ?>
+            <div class="taxes-form__note is-error" style="margin-bottom: 24px;"><?= esc(session()->getFlashdata('error')) ?></div>
+        <?php endif; ?>
+
+        <!-- ===== PREFIXES (simulation front, pas de table en base) ===== -->
         <section class="admin-section" id="prefixes" data-quicknav-target>
             <h1 class="admin-section__title">PREFIXES VALABLES</h1>
             <p class="admin-section__desc">
@@ -68,7 +81,7 @@
             </div>
         </section>
 
-        <!-- ===== OPERATIONS ===== -->
+        <!-- ===== OPERATIONS (simulation front, pas de table en base) ===== -->
         <section class="admin-section" id="operations" data-quicknav-target>
             <h1 class="admin-section__title">OPERATIONS</h1>
             <p class="admin-section__desc">
@@ -77,55 +90,53 @@
 
             <span class="admin-label">Vos operations en vigueur</span>
             <div class="pill-list">
-                <?php
-                $operations = [
-                    ['value' => 'DEPOT', 'active' => true],
-                    ['value' => 'RETRAIT', 'active' => false],
-                    ['value' => 'TRANSFERT', 'active' => false],
-                ];
-                foreach ($operations as $o) :
-                ?>
-                    <div class="pill <?= $o['active'] ? '' : 'is-off' ?>">
-                        <span class="pill__value"><?= esc($o['value']) ?></span>
-                        <button type="button" class="pill__toggle" data-state="<?= $o['active'] ? 'on' : 'off' ?>">
-                            <?= $o['active'] ? 'DESACTIVER' : 'ACTIVER' ?>
-                        </button>
+                <?php foreach ($types as $t) : ?>
+                    <div class="pill">
+                        <span class="pill__value"><?= esc(strtoupper($t['nom'])) ?></span>
+                        <button type="button" class="pill__toggle" data-state="on">DESACTIVER</button>
                     </div>
                 <?php endforeach; ?>
             </div>
         </section>
 
-        <!-- ===== TAXES ET FRAIS ===== -->
+        <!-- ===== TAXES ET FRAIS (relie a la table bareme_frais) ===== -->
         <section class="admin-section" id="taxes" data-quicknav-target>
             <h1 class="admin-section__title">TAXES ET FRAIS</h1>
             <p class="admin-section__desc">
                 Définissez les frais appliqués selon le type d'opération et la tranche de montant.
                 Exemple&nbsp;: pour un transfert entre 10&nbsp;000 et 20&nbsp;000&nbsp;Ar, appliquez 300&nbsp;Ar de frais.
+                Le dépôt reste toujours gratuit.
             </p>
 
-            <form class="taxes-form" data-taxes-form novalidate>
+            <form class="taxes-form" action="<?= base_url('admin/bareme-frais') ?>" method="post" data-taxes-form novalidate>
                 <div class="taxes-form__field">
                     <label class="admin-label" for="taxes-type">Type d'opération</label>
-                    <select class="taxes-form__input" id="taxes-type" data-taxes-type>
-                        <option value="depot">Depot</option>
-                        <option value="retrait">Retrait</option>
-                        <option value="transfert" selected>Transfert</option>
+                    <select class="taxes-form__input" id="taxes-type" name="id_type" data-taxes-type>
+                        <?php foreach ($types as $t) : ?>
+                            <option
+                                value="<?= esc($t['id']) ?>"
+                                data-nom="<?= esc($t['nom']) ?>"
+                                <?= $t['nom'] === 'transfert' ? 'selected' : '' ?>
+                            >
+                                <?= esc(ucfirst($t['nom'])) ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
                 <div class="taxes-form__field">
                     <label class="admin-label" for="taxes-min">Montant min (Ar)</label>
-                    <input class="taxes-form__input" type="number" id="taxes-min" min="0" step="100" placeholder="10000" data-taxes-min>
+                    <input class="taxes-form__input" type="number" id="taxes-min" name="montant_min" min="0" step="100" placeholder="10000" data-taxes-min required>
                 </div>
 
                 <div class="taxes-form__field">
                     <label class="admin-label" for="taxes-max">Montant max (Ar)</label>
-                    <input class="taxes-form__input" type="number" id="taxes-max" min="0" step="100" placeholder="20000" data-taxes-max>
+                    <input class="taxes-form__input" type="number" id="taxes-max" name="montant_max" min="0" step="100" placeholder="20000" data-taxes-max required>
                 </div>
 
                 <div class="taxes-form__field">
                     <label class="admin-label" for="taxes-frais">Frais (Ar)</label>
-                    <input class="taxes-form__input" type="number" id="taxes-frais" min="0" step="10" placeholder="300" data-taxes-frais>
+                    <input class="taxes-form__input" type="number" id="taxes-frais" name="frais" min="0" step="10" placeholder="300" data-taxes-frais required>
                 </div>
 
                 <button type="submit" class="admin-btn admin-btn--green taxes-form__submit" data-taxes-submit>Ajouter</button>
@@ -144,26 +155,22 @@
                         </tr>
                     </thead>
                     <tbody data-taxes-body>
-                        <?php
-                        $bareme = [
-                            ['type' => 'Retrait', 'min' => 0, 'max' => 9999, 'frais' => 100],
-                            ['type' => 'Retrait', 'min' => 10000, 'max' => 49999, 'frais' => 250],
-                            ['type' => 'Transfert', 'min' => 0, 'max' => 9999, 'frais' => 100],
-                            ['type' => 'Transfert', 'min' => 10000, 'max' => 20000, 'frais' => 300],
-                        ];
-                        foreach ($bareme as $b) :
-                        ?>
+                        <?php foreach ($baremes as $b) : ?>
                             <tr data-taxes-row>
-                                <td><?= esc($b['type']) ?></td>
-                                <td><?= number_format($b['min'], 0, ',', ' ') ?> Ar</td>
-                                <td><?= number_format($b['max'], 0, ',', ' ') ?> Ar</td>
-                                <td><?= number_format($b['frais'], 0, ',', ' ') ?> Ar</td>
-                                <td><button type="button" class="admin-btn admin-btn--orange admin-btn--small" data-taxes-delete>Supprimer</button></td>
+                                <td><?= esc(ucfirst($b['type_nom'])) ?></td>
+                                <td><?= number_format((float) $b['montant_min'], 0, ',', ' ') ?> Ar</td>
+                                <td><?= number_format((float) $b['montant_max'], 0, ',', ' ') ?> Ar</td>
+                                <td><?= number_format((float) $b['frais'], 0, ',', ' ') ?> Ar</td>
+                                <td>
+                                    <form action="<?= base_url('admin/bareme-frais/' . $b['id'] . '/delete') ?>" method="post">
+                                        <button type="submit" class="admin-btn admin-btn--orange admin-btn--small">Supprimer</button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-                <p class="admin-empty" data-taxes-empty hidden>Aucun frais configuré pour le moment.</p>
+                <p class="admin-empty" data-taxes-empty <?= count($baremes) > 0 ? 'hidden' : '' ?>>Aucun frais configuré pour le moment.</p>
             </div>
         </section>
 
