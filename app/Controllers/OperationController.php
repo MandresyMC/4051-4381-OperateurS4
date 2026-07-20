@@ -45,12 +45,33 @@ class OperationController extends BaseController
                     ->with('error', $verification);
             }
 
+            $numeroUserDestination = trim($numeroUserDestination);
+            $numeroUserDestination = str_replace(' ', '', $numeroUserDestination);
+            $verification = $this->verifyNumeroTelephone($numeroUserDestination);
+            if ($verification !== true) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', $verification);
+            }
+
             $idUserSource = $this->userModel->where('numero_telephone', $numeroUserSource)->first()['id'];
             $idUserDestination = $this->userModel->where('numero_telephone', $numeroUserDestination)->first()['id'];
 
+            if (!$idUserSource) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Utilisateur source introuvable.');
+            }
+
+            if (!$idUserDestination) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Utilisateur destination introuvable.');
+            }
+
             $frais = 0.00;
             if ($typeOperation != 'depot') {
-                $sql = "SELECT frais FROM bareme_frais WHERE ? BETWEEN montant_min AND montant_max;";
+                $sql = "SELECT frais FROM bareme_frais WHERE ? BETWEEN montant_min AND montant_max";
                 $frais = $this->operationModel->db->query($sql, [$montant])->getRowArray()['frais'];
             }
 
