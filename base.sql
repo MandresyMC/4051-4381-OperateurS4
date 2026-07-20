@@ -47,14 +47,16 @@ CREATE TABLE bareme_frais (
 CREATE TABLE operateur (
     id INT UNSIGNED AUTO_INCREMENT,
     nom VARCHAR(100) NOT NULL,
-    PRIMARY KEY (`id`)
+    id_proprietaire INT UNSIGNED,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (id_proprietaire) REFERENCES proprietaire(id)
 );
 
 CREATE TABLE prefixe (
     id INT UNSIGNED AUTO_INCREMENT,
     prefixe VARCHAR(10) NOT NULL,
     id_operateur INT UNSIGNED,
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
     FOREIGN KEY (id_operateur) REFERENCES operateur(id)
 );
 
