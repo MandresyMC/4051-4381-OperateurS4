@@ -1,0 +1,174 @@
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --mvola-yellow: #fed200;
+  --mvola-cream: #fffff0;
+  --mvola-green: #317041;
+  --mvola-orange: #ff5c3f;
+  --mvola-text: #3f3f44;
+  --mvola-border: #000000;
+}
+
+.mvola-navbar {
+  position: relative;
+  z-index: 20;
+  background-color: var(--mvola-cream);
+  box-shadow: 0px 4px 23px rgba(0, 0, 0, 0.25);
+}
+
+.mvola-navbar__inner {
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 22px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.mvola-navbar__brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mvola-navbar__logo {
+  width: 150px;
+  height: auto;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.mvola-navbar__brand:hover .mvola-navbar__logo {
+  transform: scale(1.04);
+}
+
+.mvola-navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nav-btn {
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-weight: 900;
+  font-size: 1rem;
+  letter-spacing: 0;
+  padding: 18px 26px;
+  border: 2px solid var(--mvola-border);
+  border-radius: 0;
+  background-color: var(--mvola-cream);
+  color: var(--mvola-green);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.9);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.9);
+}
+
+.nav-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.9);
+}
+
+.nav-btn--solid {
+  background-color: var(--mvola-orange);
+  color: #ffffff;
+}
+
+.mvola-navbar__toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--mvola-border);
+  background-color: var(--mvola-cream);
+  cursor: pointer;
+  padding: 0;
+}
+
+.mvola-navbar__toggle span {
+  display: block;
+  height: 2px;
+  margin: 0 8px;
+  background-color: var(--mvola-text);
+}
+
+.mvola-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 36px;
+  transform: translate(-50%, 16px);
+  background: var(--mvola-text);
+  color: #fffff0;
+  padding: 12px 20px;
+  border: 2px solid var(--mvola-border);
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 50;
+}
+
+.mvola-toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 860px) {
+  .mvola-navbar__inner {
+    padding: 16px 24px;
+  }
+
+  .mvola-navbar__toggle {
+    display: flex;
+  }
+
+  .mvola-navbar__actions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    background-color: var(--mvola-cream);
+    border-top: 2px solid var(--mvola-border);
+    padding: 18px 24px;
+    gap: 12px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+  }
+
+  .mvola-navbar__actions.is-open {
+    max-height: 320px;
+    opacity: 1;
+  }
+
+  .nav-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

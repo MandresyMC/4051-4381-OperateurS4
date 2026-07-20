@@ -1,0 +1,497 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
+
+/* ===== Fonts ===== */
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ===== Base ===== */
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root {
+  --mvola-yellow: #fed200;
+  --mvola-yellow-bg: #fed200e0;
+  --mvola-cream: #fffff0;
+  --mvola-green: #317041;
+  --mvola-text: #3f3f44;
+  --mvola-border: #000000;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  color: var(--mvola-text);
+}
+
+body {
+  background-color: var(--mvola-yellow-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+a {
+  text-decoration: none;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #4a90e2;
+}
+
+/* ===== Decorative background ===== */
+.bg-decor {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Large brand illustrations, sitting behind the card in the page background.
+   These SVGs already carry their own circles/lines, so no extra CSS shapes
+   are layered on top of them (that was causing a "duplicated" look). */
+.bg-decor .illus {
+  position: absolute;
+  opacity: 0.45;
+  filter: none;
+}
+
+.bg-decor .illus-soleil {
+  width: 34vw;
+  min-width: 320px;
+  max-width: 620px;
+  left: -9vw;
+  bottom: -10vh;
+  animation: floatSlow 12s ease-in-out infinite;
+}
+
+.bg-decor .illus-x {
+  width: 30vw;
+  min-width: 280px;
+  max-width: 560px;
+  right: -7vw;
+  top: -9vh;
+  animation: floatSlow 14s ease-in-out infinite reverse;
+}
+
+/* ===== Card ===== */
+.mvola-login {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, 92vw);
+  min-height: 620px;
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transform: translateY(24px);
+  animation: cardEnter 0.7s ease-out forwards;
+}
+
+@keyframes cardEnter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mvola-login__brand {
+  position: relative;
+  flex: 0 0 42%;
+  background-color: var(--mvola-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(2deg); }
+}
+
+.mvola-login__logo {
+  position: relative;
+  z-index: 1;
+  width: 62%;
+  max-width: 340px;
+  height: auto;
+  opacity: 0;
+  animation: logoEnter 0.8s ease-out 0.2s forwards;
+}
+
+@keyframes logoEnter {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.mvola-login__panel {
+  flex: 1;
+  background-color: var(--mvola-cream);
+  padding: 96px 64px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.mvola-login__title {
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-weight: 900;
+  color: var(--mvola-text);
+  font-size: 2.2rem;
+  letter-spacing: 0;
+  line-height: 1.15;
+  margin: 0 0 16px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease-out 0.25s forwards;
+}
+
+.mvola-login__desc {
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  color: var(--mvola-text);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin: 0 0 28px;
+  max-width: 480px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease-out 0.35s forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Flash / error message ===== */
+.mvola-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fdeaea;
+  border: 2px solid #d64545;
+  color: #a72525;
+  border-radius: 0;
+  padding: 14px 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: alertIn 0.4s ease-out forwards;
+}
+
+@keyframes alertIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mvola-alert.shake {
+  animation: alertIn 0.4s ease-out forwards, shake 0.45s ease 0.4s;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+/* ===== Phone input group ===== */
+.mvola-form {
+  opacity: 0;
+  animation: fadeUp 0.6s ease-out 0.45s forwards;
+}
+
+.field-label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  color: var(--mvola-text);
+  opacity: 0.75;
+  margin-bottom: 10px;
+}
+
+.phone-group {
+  display: flex;
+  align-items: stretch;
+  border: 2.5px solid var(--mvola-border);
+  border-radius: 0;
+  overflow: hidden;
+  background-color: #f2f2f2;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.9);
+  transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+
+.phone-group.is-focused {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.9);
+}
+
+.phone-group.is-invalid {
+  border-color: #d64545;
+  box-shadow: 4px 4px 0 rgba(214, 69, 69, 0.9);
+}
+
+.phone-group.is-invalid.is-focused {
+  box-shadow: 6px 6px 0 rgba(214, 69, 69, 0.9);
+}
+
+.phone-group__prefix {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 0 20px;
+  background-color: var(--mvola-green);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 1.2rem;
+  white-space: nowrap;
+  border-right: 2.5px solid var(--mvola-border);
+}
+
+.phone-group__input {
+  flex: 1;
+  border: none;
+  background-color: transparent;
+  color: var(--mvola-text);
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 1.5px;
+  padding: 20px 22px;
+  min-width: 0;
+}
+
+.phone-group__input::placeholder {
+  color: #3f3f4455;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+}
+
+.phone-group__input:focus {
+  outline: none;
+}
+
+.field-hint {
+  min-height: 20px;
+  font-size: 0.8rem;
+  color: #a72525;
+  margin-top: 8px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.field-hint.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== Submit button ===== */
+.mvola-btn {
+  position: relative;
+  width: 100%;
+  margin-top: 22px;
+  padding: 22px 24px;
+  border: 2.5px solid var(--mvola-border);
+  border-radius: 0;
+  background-color: var(--mvola-yellow);
+  color: var(--mvola-text);
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-weight: 900;
+  font-size: 1.4rem;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.9);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, opacity 0.2s ease;
+  overflow: hidden;
+}
+
+.mvola-btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.9);
+}
+
+.mvola-btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.9);
+}
+
+.mvola-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.mvola-btn.is-loading {
+  color: transparent;
+  pointer-events: none;
+}
+
+.mvola-btn .spinner {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border: 3px solid rgba(63, 63, 68, 0.3);
+  border-top-color: var(--mvola-text);
+  border-radius: 50%;
+}
+
+.mvola-btn.is-loading .spinner {
+  display: block;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Face ID ===== */
+.mvola-biometric {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease-out 0.55s forwards;
+}
+
+.face-id {
+  width: 76px;
+  height: 76px;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+
+.face-id:hover {
+  transform: scale(1.08);
+}
+
+.face-id.is-scanning {
+  animation: pulseScan 0.9s ease;
+}
+
+@keyframes pulseScan {
+  0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(49,112,65,0.5)); }
+  40% { transform: scale(1.12); filter: drop-shadow(0 0 10px rgba(49,112,65,0.45)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(49,112,65,0)); }
+}
+
+.mvola-biometric__caption {
+  font-weight: 300;
+  font-size: 0.85rem;
+  color: var(--mvola-text);
+  max-width: 320px;
+}
+
+.mvola-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 36px;
+  transform: translate(-50%, 16px);
+  background: var(--mvola-text);
+  color: #fffff0;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 10;
+}
+
+.mvola-toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .mvola-login {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .mvola-login__brand {
+    flex-basis: auto;
+    height: 200px;
+  }
+
+  .mvola-login__panel {
+    padding: 40px 28px 48px;
+  }
+
+  .mvola-login__title {
+    font-size: 1.7rem;
+  }
+
+  .bg-decor { display: none; }
+}
+
+@media (max-width: 480px) {
+  .phone-group__prefix {
+    padding: 0 14px;
+    font-size: 1.1rem;
+  }
+
+  .phone-group__input {
+    font-size: 1.25rem;
+    padding: 0 14px;
+  }
+
+  .mvola-btn {
+    font-size: 1.15rem;
+    padding: 18px 20px;
+  }
+}

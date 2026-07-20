@@ -1,0 +1,230 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DMSans-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root {
+  --mvola-yellow: #fed200;
+  --mvola-cream: #fffff0;
+  --mvola-green: #317041;
+  --mvola-text: #3f3f44;
+  --mvola-border: #000000;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  color: var(--mvola-text);
+}
+
+body {
+  background-color: #fffff4;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* ===== Hero ===== */
+.mvola-hero {
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: clamp(48px, 8vh, 96px) 48px 80px;
+  display: flex;
+  align-items: center;
+  gap: clamp(32px, 6vw, 96px);
+}
+
+.mvola-hero__text {
+  flex: 1 1 520px;
+  max-width: 700px;
+}
+
+.mvola-hero__title {
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  color: var(--mvola-yellow);
+  font-size: clamp(2.2rem, 4.6vw, 4.2rem);
+  line-height: 1.12;
+  margin: 0 0 28px;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeUp 0.7s ease-out 0.1s forwards;
+}
+
+.mvola-hero__desc {
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  color: var(--mvola-text);
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  line-height: 1.65;
+  margin: 0 0 40px;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeUp 0.7s ease-out 0.25s forwards;
+}
+
+@keyframes heroFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mvola-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeUp 0.7s ease-out 0.4s forwards;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  padding: 22px 28px;
+  border: 2.5px solid var(--mvola-border);
+  border-radius: 0;
+  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.9);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+}
+
+.hero-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.9);
+}
+
+.hero-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.9);
+}
+
+.hero-btn--ghost {
+  background-color: var(--mvola-cream);
+  color: var(--mvola-yellow);
+  border-color: var(--mvola-yellow);
+}
+
+.hero-btn--ghost.is-revealed {
+  color: var(--mvola-text);
+}
+
+.hero-btn--outline {
+  background-color: var(--mvola-cream);
+  color: var(--mvola-green);
+}
+
+/* ===== Media / photo ===== */
+.mvola-hero__media {
+  position: relative;
+  flex: 1 1 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 260px;
+  opacity: 0;
+  transform: translateX(24px);
+  animation: heroFadeIn 0.8s ease-out 0.3s forwards;
+}
+
+@keyframes heroFadeIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.mvola-hero__blob {
+  position: absolute;
+  width: min(70%, 480px);
+  aspect-ratio: 1;
+  background-color: var(--mvola-yellow);
+  opacity: 0.9;
+  border-radius: 38% 62% 60% 40% / 45% 40% 60% 55%;
+  z-index: 0;
+  animation: blobFloat 10s ease-in-out infinite;
+}
+
+@keyframes blobFloat {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(6deg) scale(1.03); }
+}
+
+.mvola-hero__photo {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 560px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
+  animation: photoFloat 7s ease-in-out infinite;
+}
+
+@keyframes photoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 980px) {
+  .mvola-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px 24px 64px;
+  }
+
+  .mvola-hero__text {
+    max-width: 100%;
+  }
+
+  .mvola-hero__actions {
+    justify-content: center;
+  }
+
+  .mvola-hero__media {
+    order: -1;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
