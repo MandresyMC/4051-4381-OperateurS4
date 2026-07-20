@@ -29,4 +29,11 @@ $routes->get('/admin/configuration', 'Admin\BaremeFraisController::index');
 $routes->post('/admin/bareme-frais', 'Admin\BaremeFraisController::createBaremeFrais');
 $routes->post('/admin/bareme-frais/(:num)/delete', 'Admin\BaremeFraisController::deleteBaremeFrais/$1');
 
+$routes->post('/admin/prefixe', 'Admin\BaremeFraisController::createPrefixe');
+$routes->post('/admin/prefixe/(:num)/toggle', 'Admin\BaremeFraisController::togglePrefixe/$1');
+$routes->post('/admin/prefixe/(:num)/delete', 'Admin\BaremeFraisController::deletePrefixe/$1');
+
+$routes->post('/admin/commission', 'Admin\BaremeFraisController::createCommission');
+$routes->post('/admin/commission/(:num)/delete', 'Admin\BaremeFraisController::deleteCommission/$1');
+
 $routes->get('/admin/clients', 'Admin\SituationClientController::index');

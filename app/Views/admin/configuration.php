@@ -1,7 +1,9 @@
 <?php
 /**
  * Attend, fournis par Admin\BaremeFraisController::index() :
- * $types (liste des types d'operation), $baremes (regles de frais existantes)
+ * $types (liste des types d'operation), $baremes (regles de frais existantes),
+ * $operateurs (tous les operateurs avec leur proprietaire), $operateursAutres (operateurs non proprietaires),
+ * $prefixes (prefixes configures avec operateur + proprietaire), $commissions (commissions configurees)
  */
 ?>
 <!DOCTYPE html>
@@ -24,6 +26,7 @@
             <a class="admin-quicknav__link" data-quicknav-link href="#prefixes">Prefixes</a>
             <a class="admin-quicknav__link" data-quicknav-link href="#operations">Operations</a>
             <a class="admin-quicknav__link" data-quicknav-link href="#taxes">Taxes et frais</a>
+            <a class="admin-quicknav__link" data-quicknav-link href="#commissions">Commissions</a>
         </nav>
 
         <?php if (session()->getFlashdata('success')) : ?>
@@ -33,25 +36,37 @@
             <div class="taxes-form__note is-error" style="margin-bottom: 24px;"><?= esc(session()->getFlashdata('error')) ?></div>
         <?php endif; ?>
 
-        <!-- ===== PREFIXES (simulation front, pas de table en base) ===== -->
+        <!-- ===== PREFIXES (relie aux tables prefixe / operateur / proprietaire) ===== -->
         <section class="admin-section" id="prefixes" data-quicknav-target>
             <h1 class="admin-section__title">PREFIXES VALABLES</h1>
             <p class="admin-section__desc">
-                Gérez les préfixes téléphoniques autorisés à créer un compte MVola et à effectuer des transactions.
+                Configurez les préfixes téléphoniques et associez-les à un opérateur (Yas, Orange, Airtel, ...).
+                Seuls les préfixes de l'opérateur propriétaire (Yas) peuvent créer un compte MVola ;
+                les autres opérateurs peuvent tout de même être destinataires d'un transfert.
             </p>
 
             <div class="admin-columns">
                 <div>
                     <span class="admin-label">Entrez vos prefixes</span>
-                    <form class="admin-inline-form" data-prefix-form novalidate>
+                    <form class="admin-inline-form" action="<?= base_url('admin/prefixe') ?>" method="post" data-prefix-form novalidate>
                         <input
                             type="text"
                             inputmode="numeric"
                             maxlength="3"
                             placeholder="038"
+                            name="prefixe"
                             data-prefix-input
                             required
                         >
+                        <select class="taxes-form__input" name="id_operateur" data-prefix-operateur required>
+                            <option value="">Opérateur</option>
+                            <?php foreach ($operateurs as $o) : ?>
+                                <option value="<?= esc($o['id']) ?>" data-proprietaire="<?= esc(strtolower($o['proprietaire_nom'])) ?>">
+                                    <?= esc($o['nom']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <span class="pill-badge" data-prefix-badge hidden></span>
                         <button type="submit">OK</button>
                     </form>
                 </div>
@@ -59,23 +74,27 @@
                 <div>
                     <span class="admin-label">Vos prefixes en vigueur</span>
                     <div class="pill-list" data-prefix-list>
-                        <?php
-                        $prefixes = [
-                            ['value' => '032', 'active' => true],
-                            ['value' => '033', 'active' => true],
-                            ['value' => '034', 'active' => true],
-                            ['value' => '037', 'active' => false],
-                            ['value' => '038', 'active' => true],
-                        ];
-                        foreach ($prefixes as $p) :
-                        ?>
-                            <div class="pill <?= $p['active'] ? '' : 'is-off' ?>">
-                                <span class="pill__value"><?= esc($p['value']) ?></span>
-                                <button type="button" class="pill__toggle" data-state="<?= $p['active'] ? 'on' : 'off' ?>">
-                                    <?= $p['active'] ? 'DESACTIVER' : 'ACTIVER' ?>
-                                </button>
+                        <?php foreach ($prefixes as $p) : ?>
+                            <div class="pill <?= $p['actif'] ? '' : 'is-off' ?>">
+                                <span class="pill__value">
+                                    <?= esc($p['prefixe']) ?> — <?= esc($p['operateur_nom']) ?>
+                                    <span class="pill-badge pill-badge--<?= strtolower($p['proprietaire_nom']) === 'local' ? 'local' : 'autre' ?>">
+                                        <?= strtolower($p['proprietaire_nom']) === 'local' ? 'LOCAL' : 'AUTRE' ?>
+                                    </span>
+                                </span>
+                                <form action="<?= base_url('admin/prefixe/' . $p['id'] . '/toggle') ?>" method="post" class="pill__inline-form">
+                                    <button type="submit" class="pill__toggle" data-state="<?= $p['actif'] ? 'on' : 'off' ?>">
+                                        <?= $p['actif'] ? 'DESACTIVER' : 'ACTIVER' ?>
+                                    </button>
+                                </form>
+                                <form action="<?= base_url('admin/prefixe/' . $p['id'] . '/delete') ?>" method="post" class="pill__inline-form">
+                                    <button type="submit" class="pill__delete">SUPPRIMER</button>
+                                </form>
                             </div>
                         <?php endforeach; ?>
+                        <?php if (empty($prefixes)) : ?>
+                            <p class="admin-empty">Aucun préfixe configuré pour le moment.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -171,6 +190,64 @@
                     </tbody>
                 </table>
                 <p class="admin-empty" data-taxes-empty <?= count($baremes) > 0 ? 'hidden' : '' ?>>Aucun frais configuré pour le moment.</p>
+            </div>
+        </section>
+
+        <!-- ===== COMMISSIONS (transferts vers les autres operateurs) ===== -->
+        <section class="admin-section" id="commissions" data-quicknav-target>
+            <h1 class="admin-section__title">COMMISSIONS AUTRES OPERATEURS</h1>
+            <p class="admin-section__desc">
+                En plus des frais habituels, définissez un pourcentage de commission appliqué au montant
+                lorsqu'un client transfère de l'argent vers un numéro d'un opérateur non propriétaire (ex&nbsp;: Orange, Airtel).
+            </p>
+
+            <form class="taxes-form" action="<?= base_url('admin/commission') ?>" method="post" novalidate>
+                <div class="taxes-form__field">
+                    <label class="admin-label" for="commission-operateur">Opérateur</label>
+                    <select class="taxes-form__input" id="commission-operateur" name="id_operateur" required>
+                        <?php foreach ($operateursAutres as $o) : ?>
+                            <option value="<?= esc($o['id']) ?>"><?= esc($o['nom']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="taxes-form__field">
+                    <label class="admin-label" for="commission-pourcentage">Pourcentage (%)</label>
+                    <input class="taxes-form__input" type="number" id="commission-pourcentage" name="pourcentage" min="0" max="100" step="0.1" placeholder="2.5" required>
+                </div>
+
+                <button type="submit" class="admin-btn admin-btn--green taxes-form__submit">Ajouter</button>
+            </form>
+            <?php if (empty($operateursAutres)) : ?>
+                <p class="taxes-form__note is-error">Aucun opérateur non propriétaire n'est configuré pour le moment.</p>
+            <?php endif; ?>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Opérateur</th>
+                            <th>Commission</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($commissions as $c) : ?>
+                            <tr>
+                                <td><?= esc($c['operateur_nom']) ?></td>
+                                <td><?= number_format((float) $c['pourcentage'], 2, ',', ' ') ?> %</td>
+                                <td><?= esc($c['date_creation']) ?></td>
+                                <td>
+                                    <form action="<?= base_url('admin/commission/' . $c['id'] . '/delete') ?>" method="post">
+                                        <button type="submit" class="admin-btn admin-btn--orange admin-btn--small">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <p class="admin-empty" <?= count($commissions) > 0 ? 'hidden' : '' ?>>Aucune commission configurée pour le moment.</p>
             </div>
         </section>
 

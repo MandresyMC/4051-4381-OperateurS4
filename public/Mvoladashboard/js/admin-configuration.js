@@ -1,43 +1,31 @@
 (function () {
   "use strict";
 
-  /* ---- Add a new prefix pill (simulation front, pas de sauvegarde) ---- */
-  var prefixForm = document.querySelector("[data-prefix-form]");
-  var prefixInput = document.querySelector("[data-prefix-input]");
-  var prefixList = document.querySelector("[data-prefix-list]");
+  /* ---- Formulaire prefixe : previsualise "LOCAL" / "AUTRE" selon l'operateur choisi ---- */
+  var prefixOperateur = document.querySelector("[data-prefix-operateur]");
+  var prefixBadge = document.querySelector("[data-prefix-badge]");
 
-  if (prefixForm && prefixInput && prefixList) {
-    prefixForm.addEventListener("submit", function (event) {
-      event.preventDefault();
+  function updatePrefixBadge() {
+    if (!prefixOperateur || !prefixBadge) {
+      return;
+    }
+    var selected = prefixOperateur.options[prefixOperateur.selectedIndex];
+    var proprietaire = selected ? selected.getAttribute("data-proprietaire") : null;
 
-      var value = prefixInput.value.trim();
-      if (!/^\d{3}$/.test(value)) {
-        prefixInput.focus();
-        return;
-      }
+    if (!proprietaire) {
+      prefixBadge.hidden = true;
+      return;
+    }
 
-      var exists = Array.prototype.some.call(
-        prefixList.querySelectorAll(".pill__value"),
-        function (el) { return el.textContent.trim() === value; }
-      );
-      if (exists) {
-        prefixInput.value = "";
-        prefixInput.focus();
-        return;
-      }
+    var isLocal = proprietaire === "local";
+    prefixBadge.hidden = false;
+    prefixBadge.textContent = isLocal ? "LOCAL" : "AUTRE";
+    prefixBadge.className = "pill-badge " + (isLocal ? "pill-badge--local" : "pill-badge--autre");
+  }
 
-      var pill = document.createElement("div");
-      pill.className = "pill";
-      pill.innerHTML =
-        '<span class="pill__value">' + value + '</span>' +
-        '<button type="button" class="pill__toggle" data-state="on">DESACTIVER</button>';
-
-      prefixList.appendChild(pill);
-      window.mvolaAdminWireToggle(pill.querySelector(".pill__toggle"));
-
-      prefixInput.value = "";
-      prefixInput.focus();
-    });
+  if (prefixOperateur) {
+    prefixOperateur.addEventListener("change", updatePrefixBadge);
+    updatePrefixBadge();
   }
 
   /* ---- Taxes & frais : le depot reste gratuit, on desactive les champs ---- */

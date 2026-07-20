@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\PrefixeModel;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -41,29 +42,47 @@ abstract class BaseController extends Controller
         return null;
     }
 
-    public function verifyNumeroTelephone($numero)
+    /**
+     * @param bool $requireLocal Si true, le prefixe doit appartenir a un operateur proprietaire (local).
+     *                            A utiliser pour la connexion / creation de compte MVola.
+     * @return true|string        true si valide, sinon un message d'erreur.
+     */
+    public function verifyNumeroTelephone($numero, bool $requireLocal = true)
     {
-        $numero = trim($numero);
+        $numero = trim((string) $numero);
         $numero = str_replace(' ', '', $numero);
 
         // Vérifie que le numéro ne contient que des chiffres
         if (!ctype_digit($numero)) {
-            $error = 'Le numéro de téléphone ne doit contenir que des chiffres.';
-            return $error;
+            return 'Le numéro de téléphone ne doit contenir que des chiffres.';
         }
 
         // Vérifie la longueur
         if (strlen($numero) !== 9) {
-            $error = 'Le numéro de téléphone doit contenir exactement 9 chiffres.';
-            return $error;
+            return 'Le numéro de téléphone doit contenir exactement 9 chiffres.';
         }
 
-        // Vérifie le préfixe
-        if (!preg_match('/^(32|33|34|37|38)/', $numero)) {
-            $error = 'Le numéro de téléphone doit commencer par 32, 33, 34, 37 ou 38.';
-            return $error;
+        // Vérifie le préfixe par rapport a la configuration en base (table prefixe)
+        $prefixeInfo = $this->getPrefixeInfo($numero);
+
+        if ($prefixeInfo === null) {
+            return "Ce préfixe n'est associé à aucun opérateur configuré.";
+        }
+
+        if ($requireLocal && strtolower($prefixeInfo['proprietaire_nom']) !== 'local') {
+            return "Les numéros " . $prefixeInfo['operateur_nom'] . " ne peuvent pas créer de compte MVola. Seuls les numéros de l'opérateur propriétaire sont acceptés.";
         }
 
         return true;
+    }
+
+    /**
+     * Retourne les infos (operateur, proprietaire) du prefixe correspondant au numero, ou null.
+     */
+    public function getPrefixeInfo(string $numero): ?array
+    {
+        $numero = str_replace(' ', '', trim($numero));
+
+        return (new PrefixeModel())->findByNumero($numero);
     }
 }

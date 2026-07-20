@@ -5,6 +5,7 @@ namespace App\Controllers\Client;
 use App\Controllers\BaseController;
 use App\Models\OperationModel;
 use App\Models\BaremeFraisModel;
+use App\Models\CommissionModel;
 use App\Models\TypeModel;
 use App\Models\UserModel;
 
@@ -12,6 +13,7 @@ class ClientOperationController extends BaseController
 {
     protected $operationModel;
     protected $baremeFraisModel;
+    protected $commissionModel;
     protected $typeModel;
     protected $userModel;
 
@@ -19,6 +21,7 @@ class ClientOperationController extends BaseController
     {
         $this->operationModel = new OperationModel();
         $this->baremeFraisModel = new BaremeFraisModel();
+        $this->commissionModel = new CommissionModel();
         $this->typeModel = new TypeModel();
         $this->userModel = new UserModel();
     }
@@ -122,7 +125,9 @@ class ClientOperationController extends BaseController
 
         $idUserSource = null;
         $idUserDestination = null;
+        $idOperateurDestination = null;
         $frais = 0.00;
+        $pourcentageCommission = 0.00;
 
         if ($typeOperation === 'depot') {
             $idUserDestination = $userId;
@@ -130,7 +135,9 @@ class ClientOperationController extends BaseController
             $idUserSource = $userId;
             $frais = $this->calculerFrais($type['id'], $montant);
         } else {
-            $verification = $this->verifyNumeroTelephone($numeroDestination);
+            // Le destinataire peut appartenir a n'importe quel operateur configure
+            // (Yas, ou un autre operateur), avec ou sans compte MVola.
+            $verification = $this->verifyNumeroTelephone($numeroDestination, false);
             if ($verification !== true) {
                 return redirect()->back()
                     ->withInput()
@@ -143,16 +150,24 @@ class ClientOperationController extends BaseController
                     ->with('error', 'Vous ne pouvez pas vous transférer de l\'argent à vous-même.');
             }
 
+            $prefixeInfo = $this->getPrefixeInfo($numeroDestination);
             $destinataire = $this->userModel->where('numero_telephone', $numeroDestination)->first();
-            if (!$destinataire) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'Ce numéro de destinataire ne correspond à aucun compte MVola.');
-            }
 
             $idUserSource = $userId;
-            $idUserDestination = $destinataire['id'];
             $frais = $this->calculerFrais($type['id'], $montant);
+
+            if ($destinataire) {
+                // Compte MVola existant (necessairement un numero de l'operateur proprietaire)
+                $idUserDestination = $destinataire['id'];
+            } else {
+                // Transfert externe : numero valide mais sans compte MVola (autre operateur, ou Yas sans compte)
+                $idOperateurDestination = (int) $prefixeInfo['id_operateur'];
+
+                if (strtolower($prefixeInfo['proprietaire_nom']) !== 'local') {
+                    $pourcentageCommission = $this->commissionModel->getPourcentagePourOperateur($idOperateurDestination);
+                    $frais += round($montant * $pourcentageCommission / 100, 2);
+                }
+            }
         }
 
         if ($idUserSource !== null && $user['solde'] < ($montant + $frais)) {
@@ -178,12 +193,14 @@ class ClientOperationController extends BaseController
         }
 
         $this->operationModel->insert([
-            'id_type'              => $type['id'],
-            'id_user_source'       => $idUserSource,
-            'id_user_destination'  => $idUserDestination,
-            'montant'              => $montant,
-            'frais'                => $frais,
-            'date_creation'        => date('Y-m-d H:i:s'),
+            'id_type'                => $type['id'],
+            'id_user_source'         => $idUserSource,
+            'id_user_destination'    => $idUserDestination,
+            'id_operateur'           => $idOperateurDestination,
+            'montant'                => $montant,
+            'frais'                  => $frais,
+            'pourcentage_commission' => $pourcentageCommission,
+            'date_creation'          => date('Y-m-d H:i:s'),
         ]);
 
         $db->transComplete();
