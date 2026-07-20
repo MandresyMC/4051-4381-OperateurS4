@@ -13,47 +13,49 @@ class LoginController extends BaseController
         $this->userModel = new UserModel();
     }
 
-    public function index()
-    {
-        return view('auth/login');
-    }
-
     public function verify()
     {
-        $data = $this->request->getPost();
+        $numero = trim($this->request->getPost('numero_telephone'));
 
-        $email = $data['email'];
-        $password = $data['password'];
+        if (!preg_match('/^(32|33|34|37|38)\d{7}$/', $numero)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Numéro de téléphone invalide.');
+        }
 
         try {
-            $user = $this->userModel->where('email', $email)->first();
+            $user = $this->userModel
+                ->where('numero_telephone', $numero)
+                ->first();
+
+            if (!$user) {
+
+                $data = [
+                    'numero_telephone' => $numero,
+                    'solde'            => 0,
+                    'role'             => 'client'
+                ];
+
+                $this->userModel->insert($data);
+
+                $user = $this->userModel
+                    ->where('numero_telephone', $numero)
+                    ->first();
+            }
+
         } catch (\Exception $e) {
-            return redirect()->to('/page-login')
+            return redirect()->back()
                 ->with('error', 'Une erreur est survenue. Veuillez réessayer.');
         }
 
-        // email inexistant
-        if (!$user) {
-            return redirect()->to('/page-login')
-                ->withInput()
-                ->with('error', 'Votre email est inexistant');
-        }
-
-        // vérifier le mot de passe hashé
-        if (!password_verify($password, $user['password'])) {
-            return redirect()->to('/page-login')
-                ->withInput()
-                ->with('error', 'Email ou mot de passe incorrect');
-        }
-
         session()->set([
-            'user_id' => $user['id'],
-            'nom'     => $user['nom'],
-            'role'    => $user['role'] ?? 'client',
-            'logged_in' => true
+            'user_id'           => $user['id'],
+            'numero_telephone'  => $user['numero_telephone'],
+            'solde'  => $user['solde'],
+            'logged_in'         => true
         ]);
 
-        return redirect()->to('/dashboard');
+        return redirect()->to('/accueil');
     }
 
     public function deconnexion()
