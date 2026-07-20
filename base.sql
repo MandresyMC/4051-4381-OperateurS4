@@ -35,7 +35,6 @@ CREATE TABLE `operation` (
         ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-<<<<<<< HEAD
 CREATE TABLE `bareme_frais` (
     `id` INT UNSIGNED AUTO_INCREMENT,
     `id_type` INT UNSIGNED NOT NULL DEFAULT 3,
@@ -47,16 +46,6 @@ CREATE TABLE `bareme_frais` (
         FOREIGN KEY (`id_type`) REFERENCES `type` (`id`)
         ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-=======
-CREATE TABLE bareme_frais (
-    id INT UNSIGNED AUTO_INCREMENT,
-    montant_min DECIMAL(10,2) NOT NULL,
-    montant_max DECIMAL(10,2) NOT NULL,
-    frais DECIMAL(10,2) NOT NULL,
-
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (id_type) REFERENCES type(id),
-);
 
 CREATE TABLE operateur (
     id INT UNSIGNED AUTO_INCREMENT,
@@ -86,4 +75,3 @@ CREATE TABLE proprietaire (
     `nom` VARCHAR(100) NOT NULL, -- local / autres
     PRIMARY KEY (`id`)
 );
->>>>>>> 1dbd47d96fe7d5ce98919a676fb09f4b351c662a
