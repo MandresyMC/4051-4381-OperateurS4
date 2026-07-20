@@ -33,11 +33,14 @@ CREATE TABLE `operation` (
         ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE bareme_frais (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    montant_min DECIMAL(10,2) NOT NULL,
-    montant_max DECIMAL(10,2) NOT NULL,
-    frais DECIMAL(10,2) NOT NULL,
-
-    FOREIGN KEY (id_type) REFERENCES type(id),
-);
+CREATE TABLE `bareme_frais` (
+    `id` INT UNSIGNED AUTO_INCREMENT,
+    `id_type` INT UNSIGNED NOT NULL DEFAULT 3,
+    `montant_min` DECIMAL(10,2) NOT NULL,
+    `montant_max` DECIMAL(10,2) NOT NULL,
+    `frais` DECIMAL(10,2) NOT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `fk_bareme_frais_type`
+        FOREIGN KEY (`id_type`) REFERENCES `type` (`id`)
+        ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
