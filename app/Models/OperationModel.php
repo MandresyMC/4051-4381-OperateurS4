@@ -10,6 +10,7 @@ class OperationModel extends Model
     protected $primaryKey = 'id';
 
     protected $allowedFields = [
+        'id',
         'id_type',
         'id_user_source',
         'id_user_destination',

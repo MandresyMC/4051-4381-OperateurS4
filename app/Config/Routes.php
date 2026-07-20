@@ -9,10 +9,5 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'HomeController::index');
 $routes->post('/login', 'LoginController::verify');
 
-$routes->group('admin', function($adminRoutes) {
-    $adminRoutes->get('/', 'AdminController::index');
-});
 
-$routes->group('client', function($clientRoutes) {
-    $clientRoutes->get('/', 'ClientController::index');
-});
+$routes->get('/client/operation', 'OperationController::index');

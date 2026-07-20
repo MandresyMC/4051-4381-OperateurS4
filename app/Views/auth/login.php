@@ -18,7 +18,6 @@
             type="text"
             id="numero_telephone"
             name="numero_telephone"
-            maxlength="9"
             placeholder="33 12 345 67"
             required
         >

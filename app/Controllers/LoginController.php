@@ -15,27 +15,16 @@ class LoginController extends BaseController
 
     public function verify()
     {
-        $numero = trim($this->request->getPost('numero_telephone'));
+        $numero = $this->request->getPost('numero_telephone');
+        $numero = trim($numero);
+        $numero = str_replace(' ', '', $numero);
 
-        // Vérifie que le numéro ne contient que des chiffres
-        if (!ctype_digit($numero)) {
+        $verification = $this->verifyNumeroTelephone($numero);
+
+        if ($verification !== true) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Le numéro de téléphone ne doit contenir que des chiffres.');
-        }
-
-        // Vérifie la longueur
-        if (strlen($numero) !== 9) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Le numéro de téléphone doit contenir exactement 9 chiffres.');
-        }
-
-        // Vérifie le préfixe
-        if (!preg_match('/^(32|33|34|37|38)/', $numero)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Le numéro doit commencer par 32, 33, 34, 37 ou 38.');
+                ->with('error', $verification);
         }
 
         try {
@@ -47,8 +36,7 @@ class LoginController extends BaseController
 
                 $data = [
                     'numero_telephone' => $numero,
-                    'solde'            => 0,
-                    'role'             => 'client'
+                    'solde'            => 0
                 ];
 
                 $this->userModel->insert($data);
@@ -63,19 +51,24 @@ class LoginController extends BaseController
                 ->with('error', 'Une erreur est survenue. Veuillez réessayer.');
         }
 
+        if (!$user) {
+            return redirect()->back()
+                ->with('error', 'Impossible de créer ou récupérer l\'utilisateur.');
+        }
+
         session()->set([
             'user_id'           => $user['id'],
             'numero_telephone'  => $user['numero_telephone'],
-            'solde'  => $user['solde'],
+            'solde'             => $user['solde'],
             'logged_in'         => true
         ]);
 
-        return redirect()->to('/accueil');
+        return redirect()->to('/client/operation');
     }
 
     public function deconnexion()
     {
         session()->destroy();
-        return redirect()->to('/page-login');
+        return redirect()->to('/');
     }
 }
