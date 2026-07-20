@@ -39,8 +39,7 @@
 
         <section class="tx-form" data-tx-form>
             <form action="<?= base_url('/client/operation') ?>" method="post" data-tx-form-el novalidate>
-                <input type="hidden" name="type_operation" value="" data-tx-type-input>
-                <input type="hidden" name="numero_user_source" value="<?= esc(session('numero_telephone')) ?>">
+                <input type="hidden" name="type_operation" value="<?= esc(old('type_operation')) ?>" data-tx-type-input>
 
                 <h2 class="tx-form__title">
                     <span data-tx-form-label>Nouvelle opération</span>
@@ -60,6 +59,7 @@
                         id="tx-destination"
                         name="numero_user_destination"
                         placeholder="38 63 456 98"
+                        value="<?= esc(old('numero_user_destination')) ?>"
                         data-tx-destination
                     >
                 </div>
@@ -74,6 +74,7 @@
                         min="1"
                         step="0.01"
                         placeholder="10000"
+                        value="<?= esc(old('montant')) ?>"
                         required
                     >
                 </div>

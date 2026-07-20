@@ -1,15 +1,10 @@
 <?php
-// Front-only mock rows to demonstrate the working filters.
-$rows = [
-    ['id' => 'DEP-001', 'proprietaire' => '038 83 350 87', 'destinataire' => '-',             'date' => '2026-07-20', 'statut' => 'VALIDE'],
-    ['id' => 'RET-014', 'proprietaire' => '033 12 345 67', 'destinataire' => '-',             'date' => '2026-07-19', 'statut' => 'VALIDE'],
-    ['id' => 'TRF-027', 'proprietaire' => '032 45 678 90', 'destinataire' => '034 98 765 43',  'date' => '2026-07-19', 'statut' => 'EN ATTENTE'],
-    ['id' => 'TRF-026', 'proprietaire' => '038 63 456 98', 'destinataire' => '037 11 222 33',  'date' => '2026-07-18', 'statut' => 'ECHEC'],
-    ['id' => 'DEP-000', 'proprietaire' => '033 12 345 67', 'destinataire' => '-',             'date' => '2026-07-17', 'statut' => 'VALIDE'],
-    ['id' => 'RET-013', 'proprietaire' => '034 22 111 09', 'destinataire' => '-',             'date' => '2026-07-15', 'statut' => 'EN ATTENTE'],
-    ['id' => 'TRF-025', 'proprietaire' => '038 83 350 87', 'destinataire' => '032 45 678 90',  'date' => '2026-07-12', 'statut' => 'VALIDE'],
-    ['id' => 'RET-012', 'proprietaire' => '037 55 044 21', 'destinataire' => '-',             'date' => '2026-07-10', 'statut' => 'ECHEC'],
-];
+/**
+ * Attend $operations, fourni par Client\OperationController::historiques().
+ * Chaque ligne contient : id, id_type, type_nom, montant, frais, statut, date_creation,
+ * source_numero (peut etre null), destination_numero (peut etre null).
+ */
+$moi = session('numero_telephone');
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -58,27 +53,36 @@ $rows = [
                 <thead>
                     <tr>
                         <th>ID Transaction</th>
-                        <th>Proprietaire</th>
-                        <th>Destinataire</th>
+                        <th>Type</th>
+                        <th>Correspondant</th>
+                        <th>Montant</th>
+                        <th>Frais</th>
                         <th data-hist-date-col>Date</th>
                         <th>Statut</th>
                     </tr>
                 </thead>
                 <tbody data-hist-body>
-                    <?php foreach ($rows as $row) : ?>
+                    <?php foreach ($operations as $op) :
+                        $idAffiche = strtoupper(substr($op['type_nom'], 0, 3)) . '-' . str_pad((string) $op['id'], 4, '0', STR_PAD_LEFT);
+                        $estSource = $op['source_numero'] === $moi;
+                        $correspondant = $estSource ? ($op['destination_numero'] ?? '-') : ($op['source_numero'] ?? '-');
+                        $sens = $op['type_nom'] === 'depot' ? '+' : ($estSource ? '-' : '+');
+                    ?>
                         <tr
                             data-hist-row
-                            data-search="<?= esc(strtolower($row['id'] . ' ' . $row['proprietaire'] . ' ' . $row['destinataire'])) ?>"
-                            data-date="<?= esc($row['date']) ?>"
-                            data-statut="<?= esc(strtolower($row['statut'])) ?>"
+                            data-search="<?= esc(strtolower($idAffiche . ' ' . ($correspondant !== '-' ? $correspondant : ''))) ?>"
+                            data-date="<?= esc($op['date_creation']) ?>"
+                            data-statut="<?= esc(strtolower($op['statut'])) ?>"
                         >
-                            <td class="hist-table__id"><?= esc($row['id']) ?></td>
-                            <td><?= esc($row['proprietaire']) ?></td>
-                            <td><?= esc($row['destinataire']) ?></td>
-                            <td><?= esc(date('d/m/Y', strtotime($row['date']))) ?></td>
+                            <td class="hist-table__id"><?= esc($idAffiche) ?></td>
+                            <td><?= esc(ucfirst($op['type_nom'])) ?></td>
+                            <td><?= esc($correspondant) ?></td>
+                            <td><?= $sens ?><?= number_format((float) $op['montant'], 0, ',', ' ') ?> Ar</td>
+                            <td><?= number_format((float) $op['frais'], 0, ',', ' ') ?> Ar</td>
+                            <td><?= esc(date('d/m/Y H:i', strtotime($op['date_creation']))) ?></td>
                             <td>
-                                <span class="hist-badge hist-badge--<?= esc(strtolower(str_replace(' ', '-', $row['statut']))) ?>">
-                                    <?= esc($row['statut']) ?>
+                                <span class="hist-badge hist-badge--<?= esc(strtolower($op['statut'])) ?>">
+                                    <?= esc($op['statut']) ?>
                                 </span>
                             </td>
                         </tr>
@@ -86,7 +90,9 @@ $rows = [
                 </tbody>
             </table>
 
-            <p class="hist-empty" data-hist-empty hidden>Aucune transaction ne correspond à votre recherche.</p>
+            <p class="hist-empty" data-hist-empty <?= count($operations) > 0 ? 'hidden' : '' ?>>
+                Vous n'avez encore effectué aucune transaction.
+            </p>
         </div>
     </main>
 

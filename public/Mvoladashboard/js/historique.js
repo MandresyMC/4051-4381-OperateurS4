@@ -13,11 +13,10 @@
     return;
   }
 
-  var STATUS_CYCLE = ["tous", "valide", "en attente", "echec"];
+  var STATUS_CYCLE = ["tous", "valide", "echec"];
   var STATUS_LABELS = {
     tous: "Filtrer par statut",
     valide: "Statut : Validé",
-    "en attente": "Statut : En attente",
     echec: "Statut : Échec",
   };
 

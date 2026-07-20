@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Admin;
 
+use App\Controllers\BaseController;
 use App\Models\OperationModel;
 
 class AdminSituationClientController extends BaseController
@@ -16,19 +17,20 @@ class AdminSituationClientController extends BaseController
     public function index()
     {
         $sql = "
-            SELECT 
+            SELECT
                 u.id,
                 u.numero_telephone,
                 u.solde,
-                COALESCE(SUM(o.montant), 0) AS total_operations
+                COUNT(o.id) AS nombre_operations,
+                COALESCE(SUM(o.montant), 0) AS volume_total
             FROM user u
             LEFT JOIN operation o ON o.id_user_source = u.id
-            GROUP BY u.id;
+            GROUP BY u.id
+            ORDER BY u.solde DESC
         ";
 
-        $gains = $this->operationModel->query($sql)->getResult();
+        $clients = $this->operationModel->query($sql)->getResultArray();
 
-        return view('admin/dashboard', ['gains' => $gains]);
+        return view('admin/clients', ['clients' => $clients]);
     }
-
 }

@@ -11,15 +11,15 @@ class TypeSeeder extends Seeder
         $datas = [
 
             [
-                'nom' => 'DEPOT',
+                'nom' => 'depot',
             ],
 
             [
-                'nom' => 'RETRAIT',
+                'nom' => 'retrait',
             ],
 
             [
-                'nom' => 'TRANSFERT',
+                'nom' => 'transfert',
             ],
 
         ];

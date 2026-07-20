@@ -1,119 +1,120 @@
+<?php
+/**
+ * Attend, fournis par Admin\DashboardController::index() :
+ * $nombreUtilisateurs, $volumeTotal, $nombreOperations, $gainsTotal, $tauxEchec,
+ * $evolution (mois => nombre), $repartition (type_nom => nombre)
+ */
+$stats = [
+    ['label' => 'Utilisateurs MVola', 'value' => number_format((float) $nombreUtilisateurs, 0, ',', ' ')],
+    ['label' => 'Volume total transigé', 'value' => number_format((float) $volumeTotal, 0, ',', ' ') . ' Ar'],
+    ['label' => 'Transactions totales', 'value' => number_format((float) $nombreOperations, 0, ',', ' ')],
+    ['label' => 'Gains sur frais', 'value' => number_format((float) $gainsTotal, 0, ',', ' ') . ' Ar'],
+    ['label' => "Taux d'échec", 'value' => str_replace('.', ',', (string) $tauxEchec) . ' %'],
+];
+
+$maxMonth = 1;
+foreach ($evolution as $m) {
+    $maxMonth = max($maxMonth, (int) $m['nombre']);
+}
+
+$couleurs = [
+    'depot'     => '#4b7c39',
+    'retrait'   => '#fed200',
+    'transfert' => '#317041',
+];
+
+$totalRepartition = 0;
+foreach ($repartition as $r) {
+    $totalRepartition += (int) $r['nombre'];
+}
+
+$gradientStops = [];
+$cursor = 0;
+foreach ($repartition as $r) {
+    $part = $totalRepartition > 0 ? round(($r['nombre'] / $totalRepartition) * 100) : 0;
+    $start = $cursor;
+    $cursor += $part;
+    $couleur = $couleurs[$r['type_nom']] ?? '#3f3f44';
+    $gradientStops[] = $couleur . ' ' . $start . '% ' . $cursor . '%';
+}
+$conicGradient = $gradientStops ? 'conic-gradient(' . implode(', ', $gradientStops) . ')' : '#e6e6e0';
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/style.css" />
-
+    <title>MVola Admin — Dashboard</title>
+    <link rel="icon" href="<?= base_url('favicon.ico') ?>">
+    <link rel="stylesheet" href="<?= base_url('Mvoladashboard/css/admin-common.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('Mvoladashboard/css/admin-dashboard.css') ?>">
 </head>
 <body>
-    <section id="page-dashboard-admin">
-  <div class="app-wrapper">
 
-    <aside class="sidebar">
-      <div class="sidebar-logo">Fit<span>Space</span> <span style="font-size:0.6rem;background:var(--accent);color:#fff;padding:2px 6px;border-radius:4px;vertical-align:middle;">Admin</span></div>
-      <div class="sidebar-section">Gestion</div>
-      <ul class="sidebar-nav">
-        <li>
-          <a href="/admin/reservations">
-            <i class="bi bi-bookmark-star-fill"></i> Réservations
-            <span class="sidebar-badge urgent"><?= isset($reservations) ? count($reservations) : 0 ?></span>
-          </a>
-        </li>
-        <li><a href="/admin/creneaux"><i class="bi bi-calendar-week-fill"></i> Créneaux</a></li>
-        <li><a href="#page-admin-clients"><i class="bi bi-people-fill"></i> Clients</a></li>
-      </ul>
-      <div class="sidebar-footer">
-        <div class="sidebar-user">
-          <div class="avatar" style="background:#0f3460;">AD</div>
-          <div class="user-info"><div class="name">Admin</div><div class="role">Administrateur</div></div>
-          <a href="#page-login" style="margin-left:auto;color:rgba(255,255,255,0.3);font-size:1.1rem;"><i class="bi bi-box-arrow-right"></i></a>
-        </div>
-      </div>
-    </aside>
+    <?= view('partials/navbar_admin', ['active' => 'dashboard']) ?>
 
-    <div class="main-content">
-      <div class="topbar">
-        <span class="topbar-title">Vue d'ensemble</span>
-        <div class="topbar-actions">
-          <a href="#page-admin-creneaux" class="icon-btn" title="Ajouter un créneau"><i class="bi bi-plus-lg"></i></a>
-        </div>
-      </div>
+    <main class="admin-page">
+        <section class="admin-section">
+            <h1 class="admin-section__title">EVOLUTIONS MVOLA</h1>
+            <p class="admin-section__desc">
+                Vue d'ensemble de l'activité de la plateforme&nbsp;: croissance des utilisateurs,
+                volumes transigés et répartition des opérations.
+            </p>
 
-      <div class="page-content">
-
-        <div class="metrics-row">
-          <div class="metric-card">
-            <div class="metric-icon yellow"><i class="bi bi-hourglass-split"></i></div>
-            <div class="metric-value"><?= isset($nbAttente) ? $nbAttente : 0 ?></div>
-            <div class="metric-label">En attente</div>
-            <!-- <div class="metric-trend up"><i class="bi bi-arrow-up-short"></i> +2 aujourd'hui</div> -->
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon green"><i class="bi bi-check-circle-fill"></i></div>
-            <div class="metric-value"><?= isset($nbConfirmees) ? $nbConfirmees : 0 ?></div>
-            <div class="metric-label">Confirmées ce mois</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon blue"><i class="bi bi-calendar-check"></i></div>
-            <div class="metric-value">6</div>
-            <div class="metric-label">Créneaux actifs</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon red"><i class="bi bi-people-fill"></i></div>
-            <div class="metric-value">31</div>
-            <div class="metric-label">Clients inscrits</div>
-            <div class="metric-trend up"><i class="bi bi-arrow-up-short"></i> +3 cette semaine</div>
-          </div>
-        </div>
-
-        <!-- Réservations récentes -->
-        <div class="data-card">
-          <div class="data-card-header">
-            <h3>Réservations récentes</h3>
-            <a href="#page-admin-reservations" style="font-size:0.8rem;color:var(--accent);text-decoration:none;">Tout voir →</a>
-          </div>
-          <table class="table-custom">
-            <thead>
-              <tr><th>Client</th><th>Créneau</th><th>Date</th><th>Statut</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-              <?php $count = 1;
-              foreach(($reservations ?? []) as $r) {
-                if ($count > 2) break;
-                $count++;
-                $dt_r = new DateTime($r['created_at']);
-                $date_reservation = $dt_r->format('l d F Y');
-                $heure_reservation = $dt_r->format('H\hi'); ?>
-              <tr>
-                <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="width:28px;height:28px;font-size:0.65rem;">MC</div><span class="td-name"><?= $r['user_nom'] ?></span></div></td>
-                <td class="td-muted"><?= $r['ressource_nom'] ?></td>
-                <td class="td-muted"><?= $date_reservation ?> · <?= $heure_reservation ?></td>
-                <td><span class="badge-statut s-<?= $r['statut'] == 'en_attente' ? 'attente' : ($r['statut'] == 'confirmée' ? 'confirmee' : 'annulee') ?>"><?= $r['statut'] ?></span></td>
-                <td>
-                  <?php if ($r['statut'] == 'en_attente') { ?>
-                    <div class="action-btns">
-                      <a href="/admin/reservations/confirmer/<?= $r['id'] ?>" class="btn-sm-custom btn-confirm"><i class="bi bi-check"></i> Confirmer</a>
-                      <a href="/admin/reservations/refuser/<?= $r['id'] ?>" class="btn-sm-custom btn-refuse"><i class="bi bi-x"></i> Refuser</a>
+            <div class="stat-grid">
+                <?php foreach ($stats as $i => $stat) : ?>
+                    <div class="stat-card" style="animation-delay: <?= $i * 0.08 ?>s">
+                        <span class="stat-card__label"><?= esc($stat['label']) ?></span>
+                        <span class="stat-card__value"><?= esc($stat['value']) ?></span>
                     </div>
-                  <?php } else { ?>
-                    <span style="font-size:0.75rem;color:var(--muted);">—</span>
-                  <?php } ?>
-                </td>
-              </tr>
-              <?php } ?>
-            </tbody>
-          </table>
-        </div>
+                <?php endforeach; ?>
+            </div>
+        </section>
 
-      </div>
-    </div>
-  </div>
-</section>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <section class="admin-section">
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h2 class="chart-card__title">Évolution des transactions (par mois)</h2>
+                    <?php if (empty($evolution)) : ?>
+                        <p class="admin-empty">Aucune transaction enregistrée pour le moment.</p>
+                    <?php else : ?>
+                        <div class="bar-chart">
+                            <?php foreach ($evolution as $m) : ?>
+                                <div class="bar-chart__col">
+                                    <div class="bar-chart__bar" data-bar-target="<?= round(((int) $m['nombre'] / $maxMonth) * 100) ?>">
+                                        <span class="bar-chart__value"><?= esc($m['nombre']) ?></span>
+                                    </div>
+                                    <span class="bar-chart__label"><?= esc(date('M Y', strtotime($m['mois'] . '-01'))) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="chart-card">
+                    <h2 class="chart-card__title">Répartition par opération</h2>
+                    <?php if (empty($repartition)) : ?>
+                        <p class="admin-empty">Aucune donnée à afficher.</p>
+                    <?php else : ?>
+                        <div class="donut-wrap">
+                            <div class="donut" style="background: <?= $conicGradient ?>;"></div>
+                            <ul class="donut-legend">
+                                <?php foreach ($repartition as $r) :
+                                    $part = $totalRepartition > 0 ? round(($r['nombre'] / $totalRepartition) * 100) : 0;
+                                ?>
+                                    <li>
+                                        <span class="donut-legend__swatch" style="background-color: <?= esc($couleurs[$r['type_nom']] ?? '#3f3f44') ?>;"></span>
+                                        <?= esc(ucfirst($r['type_nom'])) ?> — <strong><?= esc($part) ?>%</strong>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="<?= base_url('Mvoladashboard/js/admin-dashboard.js') ?>"></script>
 </body>
 </html>

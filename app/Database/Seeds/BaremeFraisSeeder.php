@@ -9,6 +9,7 @@ class BaremeFraisSeeder extends Seeder
     public function run()
     {
         $data = [
+            // transfert (id_type 3)
             ['id_type' => 3, 'montant_min' => 100, 'montant_max' => 1000, 'frais' => 50],
             ['id_type' => 3, 'montant_min' => 1001, 'montant_max' => 5000, 'frais' => 50],
             ['id_type' => 3, 'montant_min' => 5001, 'montant_max' => 10000, 'frais' => 100],
@@ -19,6 +20,13 @@ class BaremeFraisSeeder extends Seeder
             ['id_type' => 3, 'montant_min' => 250001, 'montant_max' => 500000, 'frais' => 1500],
             ['id_type' => 3, 'montant_min' => 500001, 'montant_max' => 1000000, 'frais' => 2500],
             ['id_type' => 3, 'montant_min' => 1000001, 'montant_max' => 2000000, 'frais' => 3000],
+
+            // retrait (id_type 2)
+            ['id_type' => 2, 'montant_min' => 100, 'montant_max' => 5000, 'frais' => 100],
+            ['id_type' => 2, 'montant_min' => 5001, 'montant_max' => 25000, 'frais' => 250],
+            ['id_type' => 2, 'montant_min' => 25001, 'montant_max' => 100000, 'frais' => 600],
+            ['id_type' => 2, 'montant_min' => 100001, 'montant_max' => 500000, 'frais' => 1200],
+            ['id_type' => 2, 'montant_min' => 500001, 'montant_max' => 2000000, 'frais' => 2500],
         ];
 
         $this->db->table('bareme_frais')->insertBatch($data);

@@ -18,20 +18,27 @@ abstract class BaseController extends Controller
         parent::initController($request, $response, $logger);
     }
 
+    /**
+     * A appeler ainsi dans un controller : if ($r = $this->verificationConnexion()) return $r;
+     */
     public function verificationConnexion()
     {
         if (!session()->get('logged_in')) {
-            return redirect()->to('/page-login')
+            return redirect()->to('/')
                 ->with('error', 'Vous devez être connecté pour accéder à cette page.');
         }
+
+        return null;
     }
 
     public function verificationConnexionAdmin()
     {
         if (!session()->get('logged_in') || session()->get('role') !== 'admin') {
-            return redirect()->to('/page-login')
+            return redirect()->to('/')
                 ->with('error', 'Vous devez être connecté pour accéder à cette page.');
         }
+
+        return null;
     }
 
     public function verifyNumeroTelephone($numero)
