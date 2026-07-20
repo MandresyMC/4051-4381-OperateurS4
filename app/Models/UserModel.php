@@ -9,7 +9,6 @@ class UserModel extends Model
     protected $table = 'user';
     protected $primaryKey = 'id';
 
-    // Champs autorisés pour insert/update
     protected $allowedFields = [
         'numero_telephone',
         'solde'
