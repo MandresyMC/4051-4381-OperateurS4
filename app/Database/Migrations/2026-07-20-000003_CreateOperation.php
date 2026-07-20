@@ -11,10 +11,16 @@ class CreateOperationTable extends Migration
         $this->forge->addField([
             'id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
             'id_type' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
-            'id_user_source' => ['type' => 'INT', 'constraint' => 11],
-            'id_user_destination' => ['type' => 'INT', 'constraint' => 11],
+            'id_user_source' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true],
+            'id_user_destination' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true],
             'montant' => ['type' => 'DECIMAL', 'constraint' => '10,2'],
             'frais' => ['type' => 'DECIMAL', 'constraint' => '10,2', 'default' => 0.00],
+            'statut' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 20,
+                'null'       => false,
+                'default'    => 'VALIDE',
+            ],
             'date_creation' => ['type' => 'DATETIME'],
         ]);
 
@@ -23,9 +29,9 @@ class CreateOperationTable extends Migration
         $this->forge->addKey('id_user_source');
         $this->forge->addKey('id_user_destination');
 
-        $this->forge->addForeignKey('id_type', 'type', 'id', 'RESTRICT', 'RESTRICT', 'fk_operation_type');
-        $this->forge->addForeignKey('id_user_source', 'user', 'id', 'RESTRICT', 'RESTRICT', 'fk_operation_user');
-        $this->forge->addForeignKey('id_user_destination', 'user', 'id', 'RESTRICT', 'RESTRICT', 'fk_operation_user_destination');
+        $this->forge->addForeignKey('id_type', 'type', 'id', 'RESTRICT', 'RESTRICT');
+        $this->forge->addForeignKey('id_user_source', 'user', 'id', 'RESTRICT', 'RESTRICT');
+        $this->forge->addForeignKey('id_user_destination', 'user', 'id', 'RESTRICT', 'RESTRICT');
 
         $this->forge->createTable('operation');
     }
