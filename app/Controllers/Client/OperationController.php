@@ -8,6 +8,7 @@ use App\Models\BaremeFraisModel;
 use App\Models\CommissionModel;
 use App\Models\TypeModel;
 use App\Models\UserModel;
+use App\Models\PromoModel;
 
 class OperationController extends BaseController
 {
@@ -16,6 +17,7 @@ class OperationController extends BaseController
     protected $commissionModel;
     protected $typeModel;
     protected $userModel;
+    protected $promoModel;
 
     public function __construct()
     {
@@ -24,6 +26,7 @@ class OperationController extends BaseController
         $this->commissionModel = new CommissionModel();
         $this->typeModel = new TypeModel();
         $this->userModel = new UserModel();
+        $this->promoModel = new PromoModel();
     }
 
     /**
@@ -324,7 +327,21 @@ class OperationController extends BaseController
                 $fraisRetrait = $this->calculerFraisRetrait($montantParDestinataire);
             }
 
+            $promo = 0.00;
+            if ($groupeNumero === 'local') {
+                $promoAzo = $this->promoModel
+                ->orderBy('id', 'DESC')
+                ->first();
+
+                if ($promoAzo != null) {
+                    $promo += $promoAzo['pourcentage'];
+                }
+            }
+            
             $commission = round($montantParDestinataire * $pourcentageCommission / 100, 2);
+            
+            $fraisTemp = round(($fraisEnvoi / $nbDestinations) + $commission, 2);
+            $totalFrais = $fraisTemp - ($fraisTemp * ($promo/100));
 
             $destinataires[] = [
                 'numero_destination'     => $numeroDestination,
@@ -332,7 +349,7 @@ class OperationController extends BaseController
                 'id_operateur'           => $idOperateurDestination,
                 'pourcentage_commission' => $pourcentageCommission,
                 'montant_envoye'         => $montantParDestinataire + $fraisRetrait,
-                'frais'                  => round(($fraisEnvoi / $nbDestinations) + $commission, 2),
+                'frais'                  => $totalFrais,
             ];
         }
 
@@ -404,8 +421,10 @@ class OperationController extends BaseController
             ->where('id_user_source', $userId)
             ->orWhere('id_user_destination', $userId)
             ->orderBy('date_creation', 'DESC')
-            ->findAll();
+            ->paginate(10);
 
-        return view('client/historique', ['operations' => $operations]);
+        $pager = $this->operationModel->pager;
+
+        return view('client/historique', ['operations' => $operations, 'pager' => $pager]);
     }
 }

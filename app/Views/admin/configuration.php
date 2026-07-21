@@ -181,6 +181,7 @@
                 </table>
                 <p class="admin-empty" data-taxes-empty <?= count($baremes) > 0 ? 'hidden' : '' ?>>Aucun frais configuré pour le moment.</p>
             </div>
+            <p class="admin-pagination"><?= $pager->links() ?></p>
         </section>
 
         <!-- ===== COMMISSIONS (transferts vers les autres operateurs) ===== -->

@@ -26,7 +26,9 @@ class AdminHistoriqueController extends BaseController
             ->join('user as dst', 'operation.id_user_destination = dst.id', 'left')
             ->join('operateur', 'operation.id_operateur = operateur.id', 'left')
             ->orderBy('operation.date_creation', 'DESC')
-            ->findAll();
+            ->paginate(10);
+
+        $pager = $this->operationModel->pager;
 
         foreach ($operations as &$op) {
             $op['montant_commission'] = round(((float) $op['montant']) * ((float) $op['pourcentage_commission']) / 100, 2);
@@ -34,6 +36,6 @@ class AdminHistoriqueController extends BaseController
         }
         unset($op);
 
-        return view('admin/historique', ['operations' => $operations]);
+        return view('admin/historique', ['operations' => $operations, 'pager' => $pager]);
     }
 }

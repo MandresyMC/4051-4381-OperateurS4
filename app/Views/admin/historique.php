@@ -80,6 +80,7 @@
                 </table>
                 <p class="admin-empty" <?= count($operations) > 0 ? 'hidden' : '' ?>>Aucune transaction enregistrée pour le moment.</p>
             </div>
+            <p class="admin-pagination"><?= $pager->links() ?></p>
         </section>
     </main>
 

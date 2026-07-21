@@ -73,6 +73,7 @@
                 </table>
                 <p class="admin-empty" data-clients-empty <?= count($clients) > 0 ? 'hidden' : '' ?>>Aucun client ne correspond à votre recherche.</p>
             </div>
+            <p class="admin-pagination"><?= $pager->links() ?></p>
         </section>
     </main>
 

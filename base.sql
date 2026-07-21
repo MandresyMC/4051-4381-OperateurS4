@@ -89,3 +89,9 @@ CREATE TABLE `bareme_frais` (
         FOREIGN KEY (`id_type`) REFERENCES `type` (`id`)
         ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `promo` (
+    `id` INT UNSIGNED AUTO_INCREMENT,
+    `pourcentage` DECIMAL(5,2) NOT NULL,
+    `date_creation` DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -4,33 +4,36 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Models\OperationModel;
+use App\Models\UserModel;
 
 class AdminSituationClientController extends BaseController
 {
     protected $operationModel;
+    protected $userModel;
 
     public function __construct()
     {
         $this->operationModel = new OperationModel();
+        $this->userModel = new UserModel();
     }
 
     public function index()
     {
-        $sql = "
-            SELECT
-                u.id,
-                u.numero_telephone,
-                u.solde,
-                COUNT(o.id) AS nombre_operations,
-                COALESCE(SUM(o.montant), 0) AS volume_total
-            FROM user u
-            LEFT JOIN operation o ON o.id_user_source = u.id
-            GROUP BY u.id
-            ORDER BY u.solde DESC
-        ";
+        $clients = $this->userModel
+            ->select('
+                user.id,
+                user.numero_telephone,
+                user.solde,
+                COUNT(operation.id) AS nombre_operations,
+                COALESCE(SUM(operation.montant), 0) AS volume_total
+            ')
+            ->join('operation', 'operation.id_user_source = user.id', 'left')
+            ->groupBy('user.id')
+            ->orderBy('user.solde', 'DESC')
+            ->paginate(10);
 
-        $clients = $this->operationModel->query($sql)->getResultArray();
+        $pager = $this->userModel->pager;
 
-        return view('admin/clients', ['clients' => $clients]);
+        return view('admin/clients', ['clients' => $clients, 'pager' => $pager]);
     }
 }

@@ -35,7 +35,9 @@ class AdminBaremeFraisController extends BaseController
             ->join('type', 'type.id = bareme_frais.id_type')
             ->orderBy('type.nom', 'ASC')
             ->orderBy('bareme_frais.montant_min', 'ASC')
-            ->findAll();
+            ->paginate(8);
+        
+        $pager = $this->baremeFraisModel->pager;
 
         $operateurs = $this->operateurModel
             ->select('operateur.*, proprietaire.nom as proprietaire_nom')
@@ -63,6 +65,7 @@ class AdminBaremeFraisController extends BaseController
         return view('admin/configuration', [
             'types'             => $types,
             'baremes'           => $baremes,
+            'pager'             => $pager,
             'operateurs'        => $operateurs,
             'operateursAutres'  => $operateursAutres,
             'prefixes'          => $prefixes,

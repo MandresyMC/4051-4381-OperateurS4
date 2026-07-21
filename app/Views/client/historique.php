@@ -94,6 +94,7 @@ $moi = session('numero_telephone');
                 Vous n'avez encore effectué aucune transaction.
             </p>
         </div>
+        <p class="hist-pagination"><?= $pager->links() ?></p>
     </main>
 
     <script src="<?= base_url('Mvoladashboard/js/historique.js') ?>"></script>
